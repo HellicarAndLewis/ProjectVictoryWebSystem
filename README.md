@@ -1,48 +1,6 @@
-# Servant
-## Version 4.0.0
+# Project Victory Web System
 
-Lean [express.js](http://expressjs.com/) project for static website prototyping with jade & less compiling, fast live reloading, directory listing etc.
-
-Server any folder direct from the command line with just:
-
-    $ servant
-
-Alternatively use as a minimal express.js server project for static websites with support for just-in-time less and jade file compiling.
-
-### Features
-
-* Very fast live reloading with [ws](https://github.com/einaros/ws) and [gaze](https://github.com/shama/gaze)
-* Compiles matching .less files for any .css requests
-* Compiles matching .jade files for any .html requests*
-* Optional .jade layout file in root
-* Directory listing
-
-_* Requests for '/' will also look for a index.jade file to compile._
-
-## Command line options
-
-    -w, --watch  Enable live reload
-    -p, --port
-
-## Command line tool usage:
-
-Install globally:
-
-    $ npm install -g servant 
-
-From any folder:
-
-    $ servant
-
-## Using as boilerplate app:
-
-    $ git clone git@github.com:rc1/Servant.git
-    $ cd Servant
-    $ rm -rf .git
-    $ node app.js
-
-### Usage
-
-With environment variables
-
-    WATCH=1 PORT=3001 node app.js
+1. Blocking of specific troll accounts, e.g. being able to block @joelgethinlewis from being able to interact at all
+2. Blocking of tweets with specific keywords such as swear words, or non brand words such as Reebok. This list will be editable on the web interface.
+3. Manual review of tweets that have passed 1) + 2) by the 5/10 person Nike team, who could be anywhere in the world
+4. Final manual review of tweets that have passed 1) 2) and 3) by an onsite Nike legal/PR/marketing representative who will be taking legal responsibility for the text content - H&L and our team will not be legally responsible for any of the content that emerges from this project.

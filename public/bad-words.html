@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>---</title>
+    <link rel="stylesheet" href="/js/libs/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/libs/jquery-1.9.1.min.js"></script>
+    <script src="/js/libs/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/js/libs/W.js"></script>
+    <script src="/watch.js"></script>
+    <script src="/js/cfg.js"></script>
+  </head>
+  <body>
+    <link rel="stylesheet" href="/js/libs/bootstrap-tag.css">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="span12"><a class="brand">Project Victory – Bad Words</a>
+            <div class="pull-right"><span class="connectionStatus">
+                <div class="label label-success connected hidden">Connected</div>
+                <div class="label label-warning disconnected">Disconnected</div></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div id="bad-words" class="row">
+        <div class="span12">
+          <div class="span12"><br><br><br><br>
+            <p>Insert tags below (using a comma to seperate or press enter to add):</p>
+          </div>
+        </div>
+      </div>
+      <div id="bad-words" class="row">
+        <div class="span12">
+          <div class="span12">
+            <input type="text" name="tags" id="tags" class="span10">
+          </div>
+          <div class="span12">
+            <div class="btn btn-primary">Save changes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- scripts-->
+    <script src="/js/libs/ICanHaz.min.js"></script>
+    <script src="/js/libs/bootstrap-tag.js"></script>
+    <script src="/js/socket-connection.js"></script>
+    <script src="/js/main-bad-words.js"></script>
+  </body>
+</html>

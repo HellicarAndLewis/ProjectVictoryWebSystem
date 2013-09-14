@@ -1,0 +1,4 @@
+{
+	"rejectionText" : "sorry! We spotted a naught word",
+	"badWordList" : "bad.words.txt"
+}

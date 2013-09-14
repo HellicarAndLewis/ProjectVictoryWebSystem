@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket Tester</title>
+    <style>
+      body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,p,blockquote,th,td{margin:0;padding:0;}
+      table{border-collapse:collapse;border-spacing:0;}
+      fieldset,img{border:0;}
+      address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}
+      ol,ul {list-style:none;}
+      caption,th {text-align:left;}
+      h1,h2,h3,h4,h5,h6{font-size:100%;}
+      q:before,q:after{content:'';}
+    </style>
+    <style>
+      body { font-family: Monaco, Consolas, "Lucida Console", monospace; font-size: 9px; }
+      header { background-color: #eae3cc; padding: 4px; border-bottom: 1px solid #819090; }
+      .messaging { width:100%; background-color: #f5ecd5; border-bottom: 1px solid #819090; }
+      #console { background-color: #fdf6e3; }
+      li { border-bottom: 1px solid #819090; }
+      .url { width: 400px; }
+      .message { width: 400px }
+      .timestamp { color: #a57706; text-align: right; display: inline-block; width: 57px; }
+      .spacer { text-align: center; width: 20px; display: inline-block; }
+      .good { background-color: #93ed7d; }
+      .bad { background-color: #ff5668; }
+      .neutral { background-color: #c4d4d3; }
+      .hidden { display: none; }
+      input, textarea { vertical-align: top; margin-left: 4px; }
+      
+    </style>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+      $(function () {
+          // Populate
+          if (window.location.hash) {
+              $(".url").val(decodeURIComponent(window.location.hash).replace("#",""));
+          }
+          // Logging Console
+          var maxLogMessage = 200;
+          var logMessages = [];
+          var $template = $("li.hidden");
+          var $newLog;
+          var now;
+          function removeOldestLogMessage() {
+              logMessages[0].remove()
+              logMessages.splice(0, 1);
+          }
+          function addLogItem(content, type) {
+              if (logMessages.length >= maxLogMessage) { removeOldestLogMessage(); }
+              $newLog = $template.clone().removeClass('hidden');
+              $newLog.prependTo("ul");
+              if (type === "good") { $newLog.addClass("good"); }
+              if (type === "neutral") { $newLog.addClass("neutral"); }
+              if (type === "bad") { $newLog.addClass("bad"); }
+              now = new Date();
+              $(".timestamp", $newLog).html(getNow());
+              $(".content", $newLog).text(content);
+              logMessages.push($newLog);
+          }
+          function getNow() {
+              return ""+now.getHours()+":"+now.getMinutes()+":"+((now.getSeconds()<10)?"0"+now.getSeconds():now.getSeconds());
+          }
+          // Web Sockets
+          var ws;
+          var webSocketIsOpen = false;
+          function setWebsocketIsOpen() {
+              $(".messaging").removeClass("hidden");
+              webSocketIsOpen = true;
+          }
+          function setWebsocketIsClosed() {
+              $(".messaging").addClass("hidden");
+              webSocketIsOpen = false;
+          }
+          function disconnectWebSocket(callback) {
+              // to do
+              if (webSocketIsOpen) {
+                  addLogItem("@todo: fix. WebSocket aleady connected. Refresh page first.","bad");
+              } else {
+                  callback();
+              }
+          }
+          function connectWebSocket(callback) {
+              var address = $(".url").val();
+              addLogItem("Attempting connection to:"+ address,"neutral");
+              window.location.hash = encodeURIComponent(address);
+              try {
+                  ws = new WebSocket(address);
+              } catch (e) {
+                  addLogItem("Cannot create web socket. Check console for details","bad");
+                  addLogItem(e,"bad");
+                  throw e;
+              }
+              ws.onopen = function () {
+                  addLogItem("WebSocket open event","good");
+                  setWebsocketIsOpen();
+              }
+              ws.onclose = function () {
+                  addLogItem("WebSocket close event","bad");
+                  setWebsocketIsClosed();
+              }
+              ws.onmessage = function (message) {
+                  addLogItem("Received: "+ message.data);
+              }
+              ws.onerror = function () {
+                  addLogItem("WebSocket error event","bad");
+              }
+          }
+          // click
+          $(".connect").on("click", function  (e) {
+              e.preventDefault();
+              if (ws) {
+                  disconnectWebSocket(connectWebSocket);
+              } else {
+                  connectWebSocket()
+              }
+          })
+          $(".send").on("click", function  (e) {
+              e.preventDefault();
+              var message = $(".message").val();
+              ws.send(message);
+              addLogItem("Sent: "+message, "neutral");
+          })
+      });
+    </script>
+  </head>
+  <body> 
+    <header> 
+      <form>
+        <input type="text" placeholder="url" class="url">
+        <input type="submit" value="connect" class="connect">
+      </form>
+    </header>
+    <div class="messaging hidden">
+      <form>
+        <textarea placeholder="message" class="message"></textarea>
+        <input type="submit" value="send" class="send">
+      </form>
+    </div>
+    <div id="console">
+      <ul>               
+        <li class="hidden"><span class="timestamp"> </span><span class="spacer">&mdash;</span><span class="content"> </span></li>
+      </ul>
+    </div>
+  </body>
+</html>

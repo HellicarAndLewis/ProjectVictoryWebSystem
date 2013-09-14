@@ -1,28 +1,20 @@
 {
   "name": "servant",
-  "version": "4.1.3",
-  "private": false,
-  "preferGlobal": true,
+  "version": "0.0.1",
+  "private": true,
   "author": "Ross Cairns <r@theworkers.net>",
-  "description": "Static file server with fast live reloading, jade compiling, less compiling, directory listing. Command line application or basic boilerplate express.js app.",
-  "scripts": {
-    "start": "node app.js"
-  },
-  "bin": {
-    "servant": "./bin/servant"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rc1/Servant.git"
-  },
+  "description": "Project Victory Web System",
   "license": "MIT",
   "dependencies": {
     "express": "3.0.3",
     "jade": "*",
     "less-middleware": "~0.1.11",
-    "ws": "~0.4.25",
+    "ws": "~0.4.30",
     "gaze": "~0.3.4",
     "optimist": "~0.5.0",
-    "underscore": "~1.4.4"
+    "underscore": "~1.4.4",
+    "ntwitter": "~0.5.0",
+    "lazy": "~1.0.11",
+    "twit": "~1.1.9"
   }
 }

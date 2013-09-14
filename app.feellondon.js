@@ -1,4 +1,9 @@
-// # Module Dependencies.
+// Application for Nike/H&L Project Victory
+
+
+// # Setup
+
+// ## Module Dependencies.
 var express = require('express');
 var http = require('http');
 var lessMiddleware = require('less-middleware');
@@ -6,14 +11,18 @@ var path = require('path');
 var fs = require('fs');
 var argv = require('optimist').argv;
 // ## Custom Modules
-var jadeMiddleware = require(path.join(__dirname, 'jade-middleware.js'));
-var liveReload = require(path.join(__dirname, 'live-reload.js'));
+var jadeMiddleware = require(path.join(__dirname, 'libs/jade-middleware.js'));
+var liveReload = require(path.join(__dirname, 'libs/live-reload.js'));
+var WebSocketRepeater = require(path.join(__dirname, 'libs/ws-repeater.js'));
+var TwitterAtClient = new require(path.join(__dirname, 'libs/twitter-at-client.js'));
 
 if (argv.h || argv.help) {
     return;
 }
 
-// Options
+// # HTML Server
+
+// ## Options
 var serveFromDirectory = path.resolve( argv.d || argv.dirname || path.join(__dirname, 'public/') );
 var shouldWatchFiles = process.env.LIVE_RELOAD || argv.l || argv.livereload; 
 // legacy
@@ -48,6 +57,29 @@ app.configure('production', function(){
 });
 
 var server = http.createServer(app);
+
+// routing
+
+app.get('/api/bad-words/', function () {
+    
+});
+
+app.put('/api/bad-words/', function () {
+    
+});
+
+// # Web Socket Server
+
+// Create the web socket server
+var websocketServer = new WebSocketRepeater({
+    server: server
+});
+
+// # Twitter Stream Connect
+
+var twitterAtClient = new TwitterAtClient();
+
+
 
 // # Live Reloading
 // To watch `WATCH=1 node app.js`

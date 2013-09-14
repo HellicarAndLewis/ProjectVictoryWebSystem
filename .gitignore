@@ -1,1 +1,4 @@
 node_modules
+sendTestTweet.shrun.sh
+script-send-test-tweet.sh
+script-run.sh

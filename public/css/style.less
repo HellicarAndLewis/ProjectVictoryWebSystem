@@ -1,12 +1,84 @@
+@import "bootstrap-tag.less";
+
 // resets
-body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,p,blockquote,th,td{margin:0;padding:0;}
+/*body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,p,blockquote,th,td{margin:0;padding:0;}
 table{border-collapse:collapse;border-spacing:0;}
 fieldset,img{border:0;}
 address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}
 ol,ul {list-style:none;}
 caption,th {text-align:left;}
 q:before,q:after{content:'';}
+*/
+// Colors
+ 
+@turquoise: #1abc9c;    .turquoise { color: @turquoise; }       .turquoiseBG { background-color: @turquoise; }
+@greenSea: #16a085;     .greenSea { color: @greenSea; }         .greenSeaBG { background-color: @greenSea; }
+@emerland: #2ecc71;     .emerland { color: @emerland; }         .emerlandBG { background-color: @emerland; }
+@nephritis: #27ae60;    .nephritis { color: @nephritis; }       .nephritisBG { background-color: @nephritis; }
+@peterRiver: #3498db;   .peterRiver { color: @peterRiver; }     .peterRiverBG { background-color: @peterRiver; }
+@belizeHole: #2980b9;   .belizeHole { color: @belizeHole; }     .belizeHoleBG { background-color: @belizeHole; }
+@amethyst: #9b59b6;     .amethyst { color: @amethyst; }         .amethystBG { background-color: @amethyst; }
+@wisteria: #8e44ad;     .wisteria { color: @wisteria; }         .wisteriaBG { background-color: @wisteria; }
+@wetAsphalt: #34495e;   .wetAsphalt { color: @wetAsphalt; }     .wetAsphaltBG { background-color: @wetAsphalt; }
+@midnightBlue: #2c3e50; .midnightBlue { color: @midnightBlue; } .midnightBlueBG { background-color: @midnightBlue; }
+@sunFlower: #f1c40f;    .sunFlower { color: @sunFlower; }       .sunFlowerBG { background-color: @sunFlower; }
+@orange: #f39c12;       .orange { color: @orange; }             .orangeBG { background-color: @orange; }
+@carrot: #e67e22;       .carrot { color: @carrot; }             .carrotBG { background-color: @carrot; }
+@pumpkin: #d35400;      .pumpkin { color: @pumpkin; }           .pumpkinBG { background-color: @pumpkin; }
+@alizarin: #e74c3c;     .alizarin { color: @alizarin; }         .alizarinBG { background-color: @alizarin; }
+@pomegranate: #c0392b;  .pomegranate { color: @pomegranate; }   .pomegranateBG { background-color: @pomegranate; }
+@clouds: #ecf0f1;       .clouds { color: @clouds; }             .cloudsBG { background-color: @clouds; }
+@silver: #bdc3c7;       .silver { color: @silver; }             .silverBG { background-color: @silver; }
+@concrete: #95a5a6;     .concrete { color: @concrete; }         .concreteBG { background-color: @concrete; }
+@asbestos: #7f8c8d;     .asbestos { color: @asbestos; }         .asbestosBG { background-color: @asbestos; }
+
 
 body {
-	background-color: white;
+    background-color: white;
+    font-family: "Helvetica Neue", "Helvetica";
+}
+
+#incoming-tweets {
+    width: 100%;
+    height: 300px;
+}
+
+.tweet {
+    padding-top: 5px;
+    padding-bottom: 5px;    
+    border-bottom: 1px solid grey;
+
+    &:hover { 
+        //background-color: #f0f0f0;
+        background-color: #000000;
+        color: white;
+    }
+
+}
+
+.someOneOver {
+    background-color: #f0f0f0;
+}
+
+@topGreen: #81cf81;
+@topRed: #d86a66;
+
+.right {
+    float: right;
+}
+
+.connectionStatus {
+    padding-right: 17px;
+    .hidden {
+        display: none;
+    }
+}
+
+.approved, .approved:hover {  
+    background-color: #d3fcd3; 
+    .btn { display: none; }
+}
+.denied, .denied:hover {  
+    background-color: #e6b0ae; 
+    .btn { display: none; }
 }
