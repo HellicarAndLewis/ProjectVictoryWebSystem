@@ -1,7 +1,17 @@
 var Twit = require('twit');
 var argv = require('optimist').argv;
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 
+// #TwitterAtClient
+//
+// ##Events:
+// * tweet
+//
 function TwitterAtClient(options) {
+    var self = this;
+    EventEmitter.call(this);
+
     if (!options) { options = {}; }
 
     var credentials = {
@@ -22,7 +32,7 @@ function TwitterAtClient(options) {
     });
 
     stream.on('tweet', function (tweet) {
-        console.log(tweet);
+        self.emit('tweet', getTweetObj(tweet));
     });
 
     stream.on('connect', function (request) {
@@ -42,58 +52,38 @@ function TwitterAtClient(options) {
 
     stream.on('disconnect', function (disconnectMessage) {
         console.log("disconnect", disconnectMessage);
-    })
+    });
 
     stream.on('warning', function (warning) {
         console.log("warning", warning);
-    })
+    });
 
-    // var credentials = {
-    //     consumer_key : options.consumerKey || process.env.CONSUMER_KEY || argv.consumerKey,
-    //     consumer_secret : options.consumerSecret || process.env.CONSUMER_SECRET || argv.consumerSecret,
-    //     access_token_key : options.accessTokenKey || process.env.ACCESS_TOKEN_KEY || argv.accessTokenKey,
-    //     access_token_secret : options.accessTokenSecret || process.env.ACCESS_TOKEN_SECRET || argv.accessTokenSecret,
-    // };
-
-    // this.twtter = new Twitter(credentials);
-
-    // this.twtter.stream('statuses/sample', function(stream) {
-    //   stream.on('data', function (data) {
-    //     console.log(data);
-    //   });
-    // });
-
-
-    // this.twtter.stream('user', {track:'nodejs'}, function (stream) {
-    //     stream.on('data', function (data) {
-    //         console.log(data);
-    //     });
-    //     stream.on('end', function (response) {
-    //         // Handle a disconnection
-    //     });
-    //     stream.on('destroy', function (response) {
-    //         // Handle a 'silent' disconnection from Twitter, no end/error event fired
-    //     });
-    //     // Disconnect stream after five seconds
-    //     setTimeout(stream.destroy, 5000);
-    // });
-
-
-
-    // try {
-
-    //     this.twtter.stream('user', {
-    //         replies : "all"
-    //     }, function(stream) {
-    //         console.log("stream");
-    //         // stream.on('data', function (data) {
-    //         //     console.log(data);
-    //         // });
-    //     });
-
-//     } catch (e) {
-//         console.log("");
-//     }
 }
+
+function getTweetObj(tweet) {
+
+    // Just to be sure
+    if (!tweet.user) { tweet.user = {}; }
+    if (!tweet.entities) { tweet.entities = {}; }
+    if (!tweet.entities.hashtags) { tweet.entities.hashtags = []; }
+    if (!tweet.entities.user_mentions) { tweet.entities.user_mentions = []; }
+
+    var data = {
+        id : tweet.id,
+        text : tweet.text,
+        inReplyToId : tweet.in_reply_to_user_id,
+        inReplyToName : tweet.in_reply_to_screen_name,
+        userId : tweet.user.id,
+        userName : tweet.user.name,
+        userScreenName : tweet.user.screen_name,
+        createdAt : tweet.created_at,
+        hashTags : tweet.entities.hashtags,
+        userMentions : tweet.entities.user_mentions
+    };
+
+    return data;
+}
+
+util.inherits(TwitterAtClient, EventEmitter);
 
 module.exports = TwitterAtClient;

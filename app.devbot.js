@@ -26,7 +26,7 @@ new lazy(fs.createReadStream(__dirname+'/data/sample.tweets.txt'))
     });
 
 function getRandomTweet() {
-    return sampleTweets[Math.floor(Math.random()*sampleTweets.length)];
+    return sampleTweets[Math.floor(Math.random()*sampleTweets.length)] + Date.now();
 }
 
 function startTweeting() {

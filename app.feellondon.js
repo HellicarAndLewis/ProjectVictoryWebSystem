@@ -15,10 +15,56 @@ var jadeMiddleware = require(path.join(__dirname, 'libs/jade-middleware.js'));
 var liveReload = require(path.join(__dirname, 'libs/live-reload.js'));
 var WebSocketRepeater = require(path.join(__dirname, 'libs/ws-repeater.js'));
 var TwitterAtClient = new require(path.join(__dirname, 'libs/twitter-at-client.js'));
+var RedisSetStorage = require(path.join(__dirname, 'libs/redis-set-storage.js'));
+var RedisTimeseriesStorage = require(path.join(__dirname, 'libs/redis-timeseries-storage.js'));
+var TwitterMiddleware = require(path.join(__dirname, 'libs/middleware.js'));
 
-if (argv.h || argv.help) {
-    return;
-}
+// # DB / Redis
+
+var redis = require("redis");
+var redisClient = redis.createClient();
+// Use data base 3
+redisClient.select(3);
+
+// Container for bad words
+var badWordsStorage = new RedisSetStorage({
+    redisClient: redisClient,
+    key: "badwords"
+});
+
+// Container for banned usernames
+var bannedUsersStorage = new RedisSetStorage({
+    redisClient: redisClient,
+    key: "badusers"
+});
+
+var hashTagTimeseriesStorage = new RedisTimeseriesStorage({
+    redisClient: redisClient,
+    key: "h"
+});
+
+// ## Utils
+
+// Returns the set of bad updating it 
+// periodically to save query the bad words 
+// every tweet
+var getBadWords = (function () {
+    var badWords = [];
+    var lastUpdated = 0;
+    var updateEveryMS = 3000;
+    return function (callback) {
+        if (Date.now() - lastUpdated > updateEveryMS) {
+            badWordsStorage.getItems(function (err, items) {
+                console.log("fetched items", err, items);
+                badWords = items;
+                callback(badWords);
+            });
+        } else {
+            console.log("no need to fetch items");
+            callback(badWords);
+        }
+    };
+}());
 
 // # HTML Server
 
@@ -49,24 +95,39 @@ app.configure(function(){
         src: serveFromDirectory
     }));
     app.use(express.static(serveFromDirectory));
+    app.use(app.router);
     app.use(express.directory(serveFromDirectory));
-});
-
-app.configure('production', function(){
-    console.log("Hmm.. servant should not be used for production");
 });
 
 var server = http.createServer(app);
 
-// routing
+// ### Routing
 
-app.get('/api/bad-words/', function () {
-    
-});
+// #### Bad words list
+app.get('/api/bad-words/', badWordsStorage.middleware.get);
+app.post('/api/bad-words/', badWordsStorage.middleware.add);
+app.delete('/api/bad-words/', badWordsStorage.middleware.delete);
 
-app.put('/api/bad-words/', function () {
-    
-});
+// #### Banned users list
+app.get('/api/banned-users/', bannedUsersStorage.middleware.get);
+app.post('/api/banned-users/', bannedUsersStorage.middleware.add);
+app.delete('/api/banned-users/', bannedUsersStorage.middleware.delete);
+
+// #### Hashtag counter
+app.get('/hashtags/:tag/', getHashTagRequestHander(RedisTimeseriesStorage.RES_MINUTE));
+app.get('/hashtags/:tag/minute/', getHashTagRequestHander(RedisTimeseriesStorage.RES_MINUTE));
+app.get('/hashtags/:tag/hour/', getHashTagRequestHander(RedisTimeseriesStorage.RES_HOUR));
+app.get('/hashtags/:tag/day/', getHashTagRequestHander(RedisTimeseriesStorage.RES_DAY));
+app.get('/hashtags/:tag/week/', getHashTagRequestHander(RedisTimeseriesStorage.RES_WEEK));
+
+function getHashTagRequestHander(res) {
+    return function (req, res) {
+        timeseries.count(req.params.tag, res, function (err, results) {
+            if (err) { res.json(500, err); return; }
+            res.json(results);
+        });
+    };
+}
 
 // # Web Socket Server
 
@@ -75,11 +136,131 @@ var websocketServer = new WebSocketRepeater({
     server: server
 });
 
+// # Twitter Flow
+
+var twitterMiddleware = new TwitterMiddleware();
+
+// ## Logout the tweet
+
+twitterMiddleware.add(function (tweet, next) {
+    console.log(tweet);
+    next();
+});
+
+// ## Check for banned users
+
+twitterMiddleware.add(function (tweet, next) {
+    bannedUsersStorage.hasItem(tweet.userScreenName, function (err, result) {
+        if (err) {
+            console.log("Error: error checking if twitter user exits", err);
+            return;
+        }
+        if (result === 1) {
+            console.log("Banned user tweeting", tweet);
+        } else {
+            next();
+        }
+    });
+});
+
+// ## Count hash tags
+
+twitterMiddleware.add(function (tweet, next) {
+    tweet.hashTags.forEach(function (hashTag) {
+        hashTagTimeseriesStorage.increment(hashTag.text);
+    });
+    next();
+});
+
+// ## Check for commands
+
+twitterMiddleware.add(function (tweet, next) {
+    next();
+});
+
+// ## Check for shout out
+
+twitterMiddleware.add(function (tweet, next) {
+    var i = 0;
+    var hasShoutout = false;
+    while (i < tweet.hashTags.length && !hasShoutout) {
+        if (tweet.hashTags[i].text === "shoutout") {
+            hasShoutout = true;
+        }
+        ++i;
+    }
+    if (hasShoutout) {
+        next();
+    }
+});
+
+// ## Check for bad words
+
+twitterMiddleware.add(function (tweet, next) {
+    getBadWords(function (badWords) {
+        var i = 0;
+        var hasBadWord = false;
+
+        while (i < badWords.length && !hasBadWord) { 
+            console.log("badWords[i]", badWords[i]);
+            if (tweet.text.indexOf(badWords[i]) > -1) {
+                hasBadWord = true;
+            }
+            ++i;
+        }
+        if (!hasBadWord) {
+            next();
+        } else {
+            console.log("Banned tweet", tweet.id);
+        }
+    });
+});
+
+// ## Store tweet and broadcast
+
+twitterMiddleware.add(function (tweet, next) {
+    var str;
+    try {
+        str = JSON.stringify(tweet);
+    } catch(e) {
+        console.log('Error jsonifying tweet', tweet);
+        return;
+    }
+    // Store in redis
+    var multi = redisClient.multi();
+    var key = 'tweets:'+tweet.id;
+    multi.set(key, str);
+    multi.expire(key, 60*60*24*7*7); // 7 weeks
+    multi.exec(function (err, result) {
+        if (err) { 
+            console.log('Problem storing tweet'); 
+            return;
+        }
+
+        var moderationMessage = {
+            resource : "/moderate/initial/",
+            method : "post",
+            body : tweet
+        };
+
+        try {
+            str = JSON.stringify(moderationMessage);
+        } catch (e) {
+            console.log('Error jsonifying moderationMessage', moderationMessage);
+            return;
+        } 
+        websocketServer.send(moderationMessage);
+
+        next();
+    });
+});
+
+// # Utils
+
 // # Twitter Stream Connect
 
 var twitterAtClient = new TwitterAtClient();
-
-
+twitterAtClient.on('tweet', twitterMiddleware.route );
 
 // # Live Reloading
 // To watch `WATCH=1 node app.js`
@@ -96,6 +277,7 @@ server.listen(app.get('port'), function() {
     console.log("\nfrom port:",  green(app.get('port')) );
     if (shouldWatchFiles) {  console.log( "whilst watching for file changes.\nadd", lcyan("`/watch.js`"), " to your html for live reloading." ); }
 });
+
 
 // Bit of color
 function green() { return "\033[1;32m" +  [].slice.apply(arguments).join(' ') + "\033[0m"; }

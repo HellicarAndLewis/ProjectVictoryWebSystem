@@ -93,4 +93,12 @@ WebSocketRepeater.prototype.heartbeat = function () {
     setTimeout(this.heartbeat, this.heartbeatSpeed);
 };
 
+WebSocketRepeater.prototype.send = function (message) {
+    this.clients.forEach(function (clientInfo) {
+        if (!clientInfo.errored) {
+            clientInfo.ws.send(message);
+        }
+    });
+};
+
 module.exports = WebSocketRepeater;
