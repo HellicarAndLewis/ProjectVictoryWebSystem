@@ -12,6 +12,7 @@ var fs = require('fs');
 var argv = require('optimist').argv;
 // ##Custom Modules
 var jadeMiddleware = require(path.join(__dirname, 'libs/jade-middleware.js'));
+var corsMiddleware = require(path.join(__dirname, 'libs/cors-middleware.js'));
 var liveReload = require(path.join(__dirname, 'libs/live-reload.js'));
 var WebSocketRepeater = require(path.join(__dirname, 'libs/ws-repeater.js'));
 var TwitterAtClient = new require(path.join(__dirname, 'libs/twitter-at-client.js'));
@@ -19,6 +20,7 @@ var RedisSetStorage = require(path.join(__dirname, 'libs/redis-set-storage.js'))
 var RedisTimeseriesStorage = require(path.join(__dirname, 'libs/redis-timeseries-storage.js'));
 var TwitterMiddleware = require(path.join(__dirname, 'libs/middleware.js'));
 var Router = require(path.join(__dirname, 'libs/router.js'));
+var MockTweetList = require(path.join(__dirname, 'libs/mock-tweet-list.js'));
 
 // #DB / Redis
 
@@ -42,6 +44,11 @@ var bannedUsersStorage = new RedisSetStorage({
 var hashTagTimeseriesStorage = new RedisTimeseriesStorage({
     redisClient: redisClient,
     key: "h"
+});
+
+// Dev Tweets lists
+var mockTweetList = new MockTweetList({
+    redisClient: redisClient
 });
 
 // ##Utils
@@ -102,6 +109,9 @@ var server = http.createServer(app);
 
 // ###Routing
 
+// ####Cors support
+app.all('*', corsMiddleware);
+
 // ####Bad words list
 app.get('/api/bad-words/', badWordsStorage.middleware.get);
 app.post('/api/bad-words/', badWordsStorage.middleware.add);
@@ -118,6 +128,26 @@ app.get('/hashtags/:tag/minute/', getHashTagRequestHander(RedisTimeseriesStorage
 app.get('/hashtags/:tag/hour/', getHashTagRequestHander(RedisTimeseriesStorage.RES_HOUR));
 app.get('/hashtags/:tag/day/', getHashTagRequestHander(RedisTimeseriesStorage.RES_DAY));
 app.get('/hashtags/:tag/week/', getHashTagRequestHander(RedisTimeseriesStorage.RES_WEEK));
+
+// ####Dev tweet list
+
+// Returns the lastest dev tweets
+app.get('/api/mock-tweet-list/', mockTweetList.middleware.get);
+app.post('/api/mock-tweet-list/', mockTweetList.middleware.post);
+app.delete('/api/mock-tweet-list/:tweetId/', mockTweetList.middleware.delete);
+app.get('/api/mock-tweet-list/trigger/:tweetId/', mockTweetList.middleware.trigger);
+
+// Store the last triggered tweets
+var triggerTweets = [];
+mockTweetList.on('triggered', function (tweet) {
+    triggerTweets.push(tweet);
+});
+
+// Returns the last triggered tweets since last request
+app.get('/api/mock-tweet-list/triggered/', function (req, res) {
+    res.send(triggerTweets);
+    triggerTweets = [];
+});
 
 function getHashTagRequestHander(resolution) {
     return function (req, res) {

@@ -1,0 +1,53 @@
+extends layout
+
+block content
+
+    .navbar.navbar-inverse.navbar-fixed-top
+        .navbar-inner
+            .container
+                .span12
+                    a.brand Project Victory – Mock Tweet System
+                    .pull-right
+                        span.connectionStatus
+                            .label.label-success.connected.hidden Connected
+                            .label.label-warning.disconnected Disconnected
+    .container
+        br/
+        br/
+        br/
+        .row
+            fieldset
+                legend Enter new mock tweet
+                label Twitter screen name (without @):
+                input(type="text", placeholder="Type something", value="1948devlist").tweetname
+                label Text:
+                textarea(rows="3", placeholder="Type something").tweettext
+        .row
+                button.btn.btn-success.save Save
+                br/
+                br/
+        .row
+            legend Tweets
+        .row#previous-tweets
+            
+
+    // templates
+    script(id="template-tweet", type="text/html")
+        .tweet(data-tweet-id="{{id}}").span12
+            .span2
+                {{username}}
+                br/
+                {{time}}
+            .span7
+                .text.inline {{text}}
+            .span2
+                .options.inline
+                    .btn.btn-danger.btn-small.remove Remove
+                    .btn.btn-success.btn-small.trigger Trigger
+
+    // scripts
+    script(src="/js/libs/infinity.js")
+    script(src="/js/libs/ICanHaz.min.js")
+    script(src="/js/libs/superagent.js")
+    script(src="/js/socket-connection.js")
+    script(src="/js/main-mock-tweets.js")
