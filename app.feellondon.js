@@ -171,12 +171,10 @@ var twitterMiddleware = new TwitterMiddleware();
 
 // ##Logout the tweet
 
-/*
 twitterMiddleware.add(function (tweet, next) {
     console.log(tweet);
     next();
 });
-*/
 
 // ##Check for banned users
 
@@ -366,7 +364,12 @@ function sendShoutout(tweet) {
 // #Twitter Stream Connect
 
 var twitterAtClient = new TwitterAtClient();
+
+// Connect the router up to the steaming twitter client 
 twitterAtClient.on('tweet', twitterMiddleware.route );
+
+// Connect the router up to the mock tweet system
+mockTweetList.on('triggered', twitterMiddleware.route ); 
 
 // #Live Reloading
 // To watch `WATCH=1 node app.js`

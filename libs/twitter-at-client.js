@@ -76,7 +76,7 @@ function getTweetObj(tweet) {
         userId : tweet.user.id,
         userName : tweet.user.name,
         userScreenName : tweet.user.screen_name,
-        createdAt : tweet.created_at,
+        createdAt : Date.parse(tweet.created_at.replace(/( \+)/, ' UTC$1')),
         hashTags : tweet.entities.hashtags,
         userMentions : tweet.entities.user_mentions
     };
