@@ -243,8 +243,7 @@ body {
   border-bottom: 1px solid grey;
 }
 .tweet:hover {
-  background-color: #000000;
-  color: white;
+  background-color: #c2fffe;
 }
 .someOneOver {
   background-color: #f0f0f0;

@@ -18,6 +18,7 @@ var TwitterAtClient = new require(path.join(__dirname, 'libs/twitter-at-client.j
 var RedisSetStorage = require(path.join(__dirname, 'libs/redis-set-storage.js'));
 var RedisTimeseriesStorage = require(path.join(__dirname, 'libs/redis-timeseries-storage.js'));
 var TwitterMiddleware = require(path.join(__dirname, 'libs/middleware.js'));
+var Router = require(path.join(__dirname, 'libs/router.js'));
 
 // # DB / Redis
 
@@ -55,12 +56,10 @@ var getBadWords = (function () {
     return function (callback) {
         if (Date.now() - lastUpdated > updateEveryMS) {
             badWordsStorage.getItems(function (err, items) {
-                console.log("fetched items", err, items);
                 badWords = items;
                 callback(badWords);
             });
         } else {
-            console.log("no need to fetch items");
             callback(badWords);
         }
     };
@@ -120,9 +119,9 @@ app.get('/hashtags/:tag/hour/', getHashTagRequestHander(RedisTimeseriesStorage.R
 app.get('/hashtags/:tag/day/', getHashTagRequestHander(RedisTimeseriesStorage.RES_DAY));
 app.get('/hashtags/:tag/week/', getHashTagRequestHander(RedisTimeseriesStorage.RES_WEEK));
 
-function getHashTagRequestHander(res) {
+function getHashTagRequestHander(resolution) {
     return function (req, res) {
-        timeseries.count(req.params.tag, res, function (err, results) {
+        hashTagTimeseriesStorage.count(req.params.tag, resolution, function (err, results) {
             if (err) { res.json(500, err); return; }
             res.json(results);
         });
@@ -142,10 +141,10 @@ var twitterMiddleware = new TwitterMiddleware();
 
 // ## Logout the tweet
 
-twitterMiddleware.add(function (tweet, next) {
-    console.log(tweet);
-    next();
-});
+// twitterMiddleware.add(function (tweet, next) {
+//     console.log(tweet);
+//     next();
+// });
 
 // ## Check for banned users
 
@@ -180,19 +179,19 @@ twitterMiddleware.add(function (tweet, next) {
 
 // ## Check for shout out
 
-twitterMiddleware.add(function (tweet, next) {
-    var i = 0;
-    var hasShoutout = false;
-    while (i < tweet.hashTags.length && !hasShoutout) {
-        if (tweet.hashTags[i].text === "shoutout") {
-            hasShoutout = true;
-        }
-        ++i;
-    }
-    if (hasShoutout) {
-        next();
-    }
-});
+// twitterMiddleware.add(function (tweet, next) {
+//     var i = 0;
+//     var hasShoutout = false;
+//     while (i < tweet.hashTags.length && !hasShoutout) {
+//         if (tweet.hashTags[i].text === "shoutout") {
+//             hasShoutout = true;
+//         }
+//         ++i;
+//     }
+//     if (hasShoutout) {
+//         next();
+//     }
+// });
 
 // ## Check for bad words
 
@@ -202,7 +201,6 @@ twitterMiddleware.add(function (tweet, next) {
         var hasBadWord = false;
 
         while (i < badWords.length && !hasBadWord) { 
-            console.log("badWords[i]", badWords[i]);
             if (tweet.text.indexOf(badWords[i]) > -1) {
                 hasBadWord = true;
             }
@@ -210,15 +208,63 @@ twitterMiddleware.add(function (tweet, next) {
         }
         if (!hasBadWord) {
             next();
-        } else {
-            console.log("Banned tweet", tweet.id);
         }
     });
 });
 
-// ## Store tweet and broadcast
+// ## Store tweet
 
 twitterMiddleware.add(function (tweet, next) {
+    storeTweet(tweet, function (err, result) {
+        if (err) { 
+            console.log('Problem storing tweet'); 
+            return;
+        }
+        next();
+    });
+});
+
+// ## Broadcast tweet
+
+twitterMiddleware.add(function (tweet, next) {
+    sendModerationTweet('initial', tweet);
+});
+
+// # Websocket listener / router
+// Perhaps this should be moved to a seperate client
+
+var wsRouter = new Router();
+
+wsRouter
+    .map('/moderation/initial/approved/:tweetId/').to(function (params) {
+        retrieveTweetWithId(params.tweetId, function (err, tweet) {
+            sendModerationTweet('legal', tweet);
+        });
+    })
+    .map('/moderation/legal/approved/:tweetId/').to(function (params) {
+        retrieveTweetWithId(params.tweetId, function (err, tweet) {
+            if (err) {
+                console.log("Could not retrieve tweet with retrieveTweetWithId for id", params.tweetId);
+            }
+           sendShoutout(tweet);
+        });
+    });
+
+websocketServer.on('message', function (message, ws) {
+    var json;
+    try {
+        json = JSON.parse(message);
+    } catch (err) {
+        return;
+    }
+    if (json.resource && typeof json.resource === "string") {
+        wsRouter.trigger(json.resource, json.body);
+    }
+});
+
+// # Utils
+
+function storeTweet(tweet, callback) {
     var str;
     try {
         str = JSON.stringify(tweet);
@@ -231,31 +277,57 @@ twitterMiddleware.add(function (tweet, next) {
     var key = 'tweets:'+tweet.id;
     multi.set(key, str);
     multi.expire(key, 60*60*24*7*7); // 7 weeks
-    multi.exec(function (err, result) {
-        if (err) { 
-            console.log('Problem storing tweet'); 
+    multi.exec(callback);
+}
+
+function retrieveTweetWithId(id, callback) {
+    redisClient.get('tweets:'+id, function (err, tweetAsString) {
+        if (err) {
+            callback(err);
             return;
         }
-
-        var moderationMessage = {
-            resource : "/moderate/initial/",
-            method : "post",
-            body : tweet
-        };
-
+        // Try JSON it
+        var tweet;
         try {
-            str = JSON.stringify(moderationMessage);
+            tweet = JSON.parse(tweetAsString);
         } catch (e) {
-            console.log('Error jsonifying moderationMessage', moderationMessage);
+            callback(e);
             return;
-        } 
-        websocketServer.send(moderationMessage);
-
-        next();
+        }
+        callback(null, tweet);
     });
-});
+}
 
-// # Utils
+// ## Broadcast messages
+
+function sendModerationTweet(level, tweet) {
+    var moderationMessage = {
+        resource : "/moderation/"+level+"/new/",
+        method : "post",
+        body : tweet
+    };
+    try {
+        str = JSON.stringify(moderationMessage);
+    } catch (e) {
+        console.log('Error jsonifying moderation message', moderationMessage);
+        return;
+    } 
+    websocketServer.send(str);
+}
+
+function sendShoutout(tweet) {
+    var moderationMessage = {
+        resource : "/shoutout/new/",
+        body : tweet
+    };
+    try {
+        str = JSON.stringify(moderationMessage);
+    } catch (e) {
+        console.log('Error jsonifying moderation message', moderationMessage);
+        return;
+    } 
+    websocketServer.send(str);
+}
 
 // # Twitter Stream Connect
 

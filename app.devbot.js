@@ -26,12 +26,13 @@ new lazy(fs.createReadStream(__dirname+'/data/sample.tweets.txt'))
     });
 
 function getRandomTweet() {
-    return sampleTweets[Math.floor(Math.random()*sampleTweets.length)] + Date.now();
+    return sampleTweets[Math.floor(Math.random()*sampleTweets.length)] + " " + Date.now();
 }
 
 function startTweeting() {
     // action a tweet
     var twitter = new Twitter(credentials);
+    var tweet = getRandomTweet();
 
     twitter
         .verifyCredentials(function (err, data) {
@@ -39,8 +40,9 @@ function startTweeting() {
                 console.log("Error verifyCredentials", err);
             }
         })
-        .updateStatus(getRandomTweet(),
+        .updateStatus(tweet,
             function (err, data) {
+                console.log(tweet);
                 if (err) {
                     console.log("Error updateStatus", err);
                 } else {

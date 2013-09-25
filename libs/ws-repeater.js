@@ -1,6 +1,7 @@
 var WebSocketServer = require('ws').Server;
 var _ = require("underscore");
-
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 /// # WebSocketRepeater
 //
@@ -37,6 +38,8 @@ function WebSocketRepeater (options) {
         clientCount++;
 
         ws.on('message', function(message) {
+            self.emit('message', message, ws);
+
             var messageJSON;
             var responce;
 
@@ -79,6 +82,8 @@ function WebSocketRepeater (options) {
     }
 
 }
+
+util.inherits(WebSocketRepeater, EventEmitter);
 
 WebSocketRepeater.prototype.heartbeat = function () {
     var self = this;

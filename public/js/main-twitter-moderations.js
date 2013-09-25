@@ -1,7 +1,11 @@
-var moderationLevel = 1;
+var moderationLevel = window.location.hash.replace('#', '');
 var jsonSocket;
 
 $(function () {
+
+    // check the moderation level has been set
+    if (moderationLevel.length === 0) {
+    }
 
     // add the level
     $('.connectionStatus').append('<div class="label label-info">Moderation Level:'+moderationLevel+'</div>');
@@ -36,11 +40,18 @@ $(function () {
         })
         .map('/moderation/'+moderationLevel+'/denied/:id/').to(function(params) {
             $('.tweet[data-tweet-id='+params.id+']').addClass('denied').addClass('moderated');
+        })
+        .map('/moderation/'+moderationLevel+'/new/').to(function (params, body) {
+            console.log("Recieved new tweet");
+            addTweetView(body);
         });
+
+    console.log("Added route:", '/moderation/'+moderationLevel+'/new/');
 
     jsonSocket.on('json', function (data) {
         if (typeof data.resource !== 'undefined') {
-            router.trigger(data.resource);
+            console.log("Will route", data.resource);
+            router.trigger(data.resource, data.body);
         }   
     });
 
@@ -92,28 +103,33 @@ $(function () {
 
     // Debug adding items
 
-    var addItemCounter = 0;
-
-    function addItem() {
-        
+    // var addItemCounter = 0;
+    // function addItem() {
+    //     var $newContent = ich['template-tweet']({
+    //         id: ++addItemCounter,
+    //         username: "@rossc1",
+    //         text: "This is a tweet",
+    //         time: getTime()
+    //     });
+    //     var item = listView.append($newContent);
+    //     setTimeout(addItem, 333);
+    // }
+    // function getTime() {
+    //     var d = new Date();
+    //     return d.getHours() + ":" + d.getMinutes();
+    // }
+    // addItem();
+    
+    function addTweetView(tweet) {
+        console.log("tweet is ", tweet);
         var $newContent = ich['template-tweet']({
-            id: ++addItemCounter,
-            username: "@rossc1",
-            text: "This is a tweet",
-            time: getTime()
+            id: tweet.id,
+            username: tweet.userScreenName,
+            text: tweet.text,
+            time: tweet.createdAt
         });
-
         var item = listView.append($newContent);
-
-        setTimeout(addItem, 333);
     }
-
-    function getTime() {
-        var d = new Date();
-        return d.getHours() + ":" + d.getMinutes();
-    }
-
-    addItem();
 
 });
 
