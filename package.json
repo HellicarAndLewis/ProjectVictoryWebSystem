@@ -18,5 +18,8 @@
     "twit": "~1.1.9",
     "redis": "~0.8.4",
     "hiredis": "~0.1.15"
+  },
+  "devDependencies": {
+    "docco": "~0.4.0"
   }
 }

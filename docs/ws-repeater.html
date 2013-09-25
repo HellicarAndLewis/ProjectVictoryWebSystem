@@ -1,0 +1,97 @@
+<!DOCTYPE html>  <html> <head>   <title>ws-repeater.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="app.feellondon.html">                 app.feellondon.js               </a>                                           <a class="source" href="jade-middleware.html">                 jade-middleware.js               </a>                                           <a class="source" href="linked-list.html">                 linked-list.js               </a>                                           <a class="source" href="live-reload.html">                 live-reload.js               </a>                                           <a class="source" href="middleware.html">                 middleware.js               </a>                                           <a class="source" href="redis-set-storage.html">                 redis-set-storage.js               </a>                                           <a class="source" href="redis-timeseries-storage.html">                 redis-timeseries-storage.js               </a>                                           <a class="source" href="router.html">                 router.js               </a>                                           <a class="source" href="twitter-at-client.html">                 twitter-at-client.js               </a>                                           <a class="source" href="ws-repeater.html">                 ws-repeater.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               ws-repeater.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">WebSocketServer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ws&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">_</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;underscore&quot;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">util</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;util&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">EventEmitter</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;events&#39;</span><span class="p">).</span><span class="nx">EventEmitter</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>/ # WebSocketRepeater</p>
+
+<p>Options:
+  * port <Number> only required if no server
+  * server <HttpServer>
+  * useHeartbeat <Boolean> </p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">WebSocketRepeater</span> <span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{};</span> <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">port</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">port</span> <span class="o">||</span> <span class="mi">8080</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">clientCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">idCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">clients</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="kd">var</span> <span class="nx">wss</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">server</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">wss</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocketServer</span><span class="p">({</span><span class="nx">server</span><span class="o">:</span> <span class="nx">options</span><span class="p">.</span><span class="nx">server</span><span class="p">});</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">wss</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocketServer</span><span class="p">({</span><span class="nx">port</span><span class="o">:</span> <span class="nx">port</span><span class="p">});</span>
+    <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>websocket connections</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">wss</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;connection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ws</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">clientInfo</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">ws</span><span class="o">:</span> <span class="nx">ws</span><span class="p">,</span>
+            <span class="nx">cid</span><span class="o">:</span> <span class="o">++</span><span class="nx">idCounter</span><span class="p">,</span>
+            <span class="nx">errored</span><span class="o">:</span> <span class="kc">false</span>
+        <span class="p">};</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">clients</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">clientInfo</span><span class="p">);</span>
+        <span class="nx">clientCount</span><span class="o">++</span><span class="p">;</span>
+
+        <span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">self</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">ws</span><span class="p">);</span>
+
+            <span class="kd">var</span> <span class="nx">messageJSON</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">responce</span><span class="p">;</span>
+
+            <span class="nx">self</span><span class="p">.</span><span class="nx">clients</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">client</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">client</span><span class="p">.</span><span class="nx">cid</span> <span class="o">!==</span> <span class="nx">clientInfo</span><span class="p">.</span><span class="nx">cid</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">client</span><span class="p">.</span><span class="nx">ws</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>try {
+    messageJSON = JSON.parse(message);
+} catch (e) {}</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>if (messageJSON) {
+    testAllRoutes(routes, ws, messageJSON);
+} </p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="p">});</span>
+
+        <span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">self</span><span class="p">.</span><span class="nx">clients</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">without</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">clients</span><span class="p">,</span> <span class="nx">clientInfo</span><span class="p">);</span>
+            <span class="o">--</span><span class="nx">clientCount</span><span class="p">;</span>
+            <span class="nx">logClientCount</span><span class="p">();</span>
+        <span class="p">});</span>
+
+        <span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="nx">logClientCount</span><span class="p">();</span>
+            <span class="nx">clientInfo</span><span class="p">.</span><span class="nx">errored</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">});</span>
+
+        <span class="nx">logClientCount</span><span class="p">();</span>
+    <span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>start the heat beat</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">useHeartbeat</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">heartbeat</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">logClientCount</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Client count &quot;</span><span class="p">,</span> <span class="nx">clientCount</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="p">}</span>
+
+<span class="nx">util</span><span class="p">.</span><span class="nx">inherits</span><span class="p">(</span><span class="nx">WebSocketRepeater</span><span class="p">,</span> <span class="nx">EventEmitter</span><span class="p">);</span>
+
+<span class="nx">WebSocketRepeater</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">heartbeat</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">clients</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">clientInfo</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">clientInfo</span><span class="p">.</span><span class="nx">errored</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">clientInfo</span><span class="p">.</span><span class="nx">ws</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s1">&#39;{&quot;resource&quot;:&quot;/heartbeat/1000/&quot;,&quot;body&quot;:{&quot;count&quot;:&quot;&#39;</span><span class="o">+</span><span class="k">this</span><span class="p">.</span><span class="nx">heartBeatCounter</span><span class="o">+</span><span class="s1">&#39;&quot;}}&#39;</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="nx">self</span><span class="p">.</span><span class="nx">heartBeatCounter</span> <span class="o">&gt;</span> <span class="mi">100000</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">self</span><span class="p">.</span><span class="nx">heartBeatCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+    <span class="nx">setTimeout</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">heartbeat</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">heartbeatSpeed</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">WebSocketRepeater</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">send</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">clients</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">clientInfo</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">clientInfo</span><span class="p">.</span><span class="nx">errored</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">clientInfo</span><span class="p">.</span><span class="nx">ws</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">};</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">WebSocketRepeater</span><span class="p">;</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
