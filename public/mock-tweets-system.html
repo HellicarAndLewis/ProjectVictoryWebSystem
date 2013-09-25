@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>---</title>
+    <link rel="stylesheet" href="/js/libs/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/libs/jquery-1.9.1.min.js"></script>
+    <script src="/js/libs/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/js/libs/W.js"></script>
+    <script src="/watch.js"></script>
+    <script src="/js/cfg.js"></script>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="span12"><a class="brand">Project Victory – Mock Tweet System</a>
+            <div class="pull-right"><span class="connectionStatus">
+                <div class="label label-success connected hidden">Connected</div>
+                <div class="label label-warning disconnected">Disconnected</div></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container"><br><br><br>
+      <div class="row">
+        <fieldset>
+          <legend>Enter new mock tweet</legend>
+          <label>Twitter screen name (without @):</label>
+          <input type="text" placeholder="Type something" value="1948devlist" class="tweetname">
+          <label>Text:</label>
+          <textarea rows="3" placeholder="Type something" class="tweettext"></textarea>
+        </fieldset>
+      </div>
+      <div class="row">
+        <button class="btn btn-success save">Save</button><br><br>
+      </div>
+      <div class="row">
+        <legend>Tweets</legend>
+      </div>
+      <div id="previous-tweets" class="row"></div>
+    </div>
+    <!-- templates-->
+    <script id="template-tweet" type="text/html">
+      <div data-tweet-id="{{id}}" class="tweet span12">
+        <div class="span2">{{username}}<br>{{time}}</div>
+        <div class="span7">
+          <div class="text inline">{{text}}</div>
+        </div>
+        <div class="span2">
+          <div class="options inline">
+            <div class="btn btn-danger btn-small remove">Remove</div>
+            <div class="btn btn-success btn-small trigger">Trigger</div>
+          </div>
+        </div>
+      </div>
+    </script>
+    <!-- scripts-->
+    <script src="/js/libs/infinity.js"></script>
+    <script src="/js/libs/ICanHaz.min.js"></script>
+    <script src="/js/libs/superagent.js"></script>
+    <script src="/js/socket-connection.js"></script>
+    <script src="/js/main-mock-tweets.js"></script>
+  </body>
+</html>
