@@ -58,7 +58,7 @@ $(function () {
             userId : 0,
             userName : "Dev list tweeter",
             userScreenName : $nameEl.val(),
-            createdAt : date.toString(),
+            createdAt : Date.now(),
             hashTags : [],
             userMentions : []
         };
