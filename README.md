@@ -12,5 +12,22 @@
 * /moderation-view.html#initial – Initial moderation web app
 * /moderation-view.html#legal – Legal moderation web app
 * /websocket-monitor.html - Dev. tool for monitoring websockets communications
+* /hashtags/:hashtag/minute/ – Get the number of occurances of a `hashtag` per minutes for every minute in the last 120 minutes
+* /hashtags/:hashtag/hour/ – Get the number of occurances of a `hashtag` per hour for every hour in the last 120 hours
+* /hashtags/:hashtag/day/ – Get the number of occurances of a `hashtag` per day for every day in the last 120 days
+* /hashtags/:hashtag/week/ – Get the number of occurances of a `hashtag` per week for every week in the last 120 week
 
+# Notes
 
+Doesn't run direction from `app.feellondon.js`, needs to be encapsulated within a bash (or other script). E.g.:
+
+__script-run.sh__
+
+````bash
+#!/bin/sh
+CONSUMER_KEY= \
+CONSUMER_SECRET= \
+ACCESS_TOKEN_KEY= \
+ACCESS_TOKEN_SECRET= \
+node app.feellondon.js 
+````
