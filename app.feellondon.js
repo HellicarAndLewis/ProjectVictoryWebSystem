@@ -209,7 +209,6 @@ twitterMiddleware.add(function (tweet, next) {
 
 // ##Check for shout out
 
-/*
 twitterMiddleware.add(function (tweet, next) {
     var i = 0;
     var hasShoutout = false;
@@ -223,7 +222,6 @@ twitterMiddleware.add(function (tweet, next) {
         next();
     }
 });
-*/
 
 // ##Check for bad words
 
