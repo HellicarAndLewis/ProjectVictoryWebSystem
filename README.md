@@ -133,11 +133,25 @@ Sample:
         }
     }
 
+#### Hashtag Count
+
+Hashtag count
+
+    {
+        "resource" : "/hashtags/count/new/",
+        "body" : {
+            "tag" : "sometag",
+            "resolution" : "minute",
+            "result" : [null,1,null]
+        },
+        "token" : "optional"
+    }
+
 ### Requests
 
 Get a count of hash tags
 
     {
-        "resource" : "/hashtags/:tag/:resolution/",
+        "resource" : "/hashtags/preformcount/:tag/:resolution/",
         "token" : ":token"
     }
