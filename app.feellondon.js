@@ -344,6 +344,15 @@ wsRouter
             addToLastShoutouts(tweet);
             sendShoutout(tweet);
         });
+    })
+    .map('/hashtags/preformcount/:tag/:resolution/').to(function (params, body, token) {
+        hashTagTimeseriesStorage.count(params.tag, params.resolution, function (err, result) {
+            if (err) {
+                console.log("Failed to get hash tag count via websockets for", params.tag, params.resolution, token);
+                return;
+            }
+            sendHashTagCount(params.tag, params.resolution, result, token);
+        });
     });
 
 websocketServer.on('message', function (message, ws) {
@@ -354,7 +363,7 @@ websocketServer.on('message', function (message, ws) {
         return;
     }
     if (json.resource && typeof json.resource === "string") {
-        wsRouter.trigger(json.resource, json.body);
+        wsRouter.trigger(json.resource, json.body, json.token);
     }
 });
 
@@ -443,6 +452,27 @@ function sendCommand(tweet, payload) {
         str = JSON.stringify(moderationMessage);
     } catch (e) {
         console.log('Error jsonifying moderation message', moderationMessage);
+        return;
+    } 
+    websocketServer.send(str);
+}
+
+function sendHashTagCount(tag, resolution, result, token) {
+    var countMessage = {
+        resource : "/hashtags/count/new/",
+        body : {
+            tag: tag,
+            resolution: resolution,
+            result : result
+        }
+    };
+    if (typeof token !== "undefined" || token !== null) {
+        countMessage.token = token;
+    }
+    try {
+        str = JSON.stringify(countMessage);
+    } catch (e) {
+        console.log('Error jsonifying count message', countMessage);
         return;
     } 
     websocketServer.send(str);

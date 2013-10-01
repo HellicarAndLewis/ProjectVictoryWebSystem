@@ -46,7 +46,9 @@ node app.feellondon.js
 ````
 ## Protocol
 
-### Shoutout
+### Announcements
+
+#### Shoutout
 
     {
         "resource": "/shoutout/new/",
@@ -85,7 +87,7 @@ node app.feellondon.js
         }
     }
 
-### Command
+#### Command
 
 Sample:
 
@@ -129,4 +131,13 @@ Sample:
                 "payloadname": "Glitch"
             }
         }
+    }
+
+### Requests
+
+Get a count of hash tags
+
+    {
+        "resource" : "/hashtags/:tag/:resolution/",
+        "token" : ":token"
     }
