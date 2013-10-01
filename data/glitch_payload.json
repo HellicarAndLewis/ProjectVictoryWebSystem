@@ -1,0 +1,13 @@
+{
+   "effects" : [
+      {
+         "name" : "scanlines",
+         "uniforms" : [
+            {
+               "nIntensity" : 0.8863080143928528
+            }
+         ]
+      }
+   ],
+   "payloadname" : "Glitch"
+}

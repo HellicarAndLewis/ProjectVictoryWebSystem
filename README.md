@@ -37,9 +37,77 @@ __script-run.sh__
 
 ````bash
 #!/bin/sh
+TWITTER_SCREENNAME= \
 CONSUMER_KEY= \
 CONSUMER_SECRET= \
 ACCESS_TOKEN_KEY= \
 ACCESS_TOKEN_SECRET= \
 node app.feellondon.js 
 ````
+## Protocol
+
+### Shoutout
+
+    {
+        resource : "/shoutout/new/",
+        body : {
+            tweet : {
+                id : 
+                text : 
+                inReplyToId : 
+                inReplyToName : 
+                userId : 
+                userName : 
+                userScreenName : 
+                createdAt : 
+                hashTags : 
+                userMentions : 
+            }
+        }
+    }
+
+### Command
+
+Sample:
+
+    {
+        "resource": "/command/new/",
+        "body": {
+            "tweet": {
+                "id": 384984189629919200,
+                "text": "@1948dev glitch it",
+                "inReplyToId": 1732263122,
+                "inReplyToName": "1948dev",
+                "userId": 250881376,
+                "userName": "The Worker",
+                "userScreenName": "sputnik_w",
+                "createdAt": 1380622358000,
+                "hashTags": [],
+                "userMentions": [
+                    {
+                        "screen_name": "1948dev",
+                        "name": "Ross Cairns",
+                        "id": 1732263122,
+                        "id_str": "1732263122",
+                        "indices": [
+                            0,
+                            8
+                        ]
+                    }
+                ]
+            },
+            "payload": {
+                "effects": [
+                    {
+                        "name": "scanlines",
+                        "uniforms": [
+                            {
+                                "nIntensity": 0.8863080143928528
+                            }
+                        ]
+                    }
+                ],
+                "payloadname": "Glitch"
+            }
+        }
+    }

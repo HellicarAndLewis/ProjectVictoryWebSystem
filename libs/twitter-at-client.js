@@ -21,11 +21,9 @@ function TwitterAtClient(options) {
         access_token_secret : options.accessTokenSecret || process.env.ACCESS_TOKEN_SECRET || argv.accessTokenSecret,
     };
 
-    console.log("credentials", credentials);
+    this.twitter = new Twit(credentials);
 
-    this.twtter = new Twit(credentials);
-
-    var stream = this.twtter.stream('user');
+    var stream = this.twitter.stream('user');
 
     stream.on('error', function (err) {
         console.log("error", err);

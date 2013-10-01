@@ -129,6 +129,42 @@ app.get('/hashtags/:tag/hour/', getHashTagRequestHander(RedisTimeseriesStorage.R
 app.get('/hashtags/:tag/day/', getHashTagRequestHander(RedisTimeseriesStorage.RES_DAY));
 app.get('/hashtags/:tag/week/', getHashTagRequestHander(RedisTimeseriesStorage.RES_WEEK));
 
+// ####Tweet back images uploaded
+app.get('/api/imageuploaded/:tweetId/', function (req, res) {
+    makeImageReplyText(req.params.tweetId, function (err, text) {
+        if (err) {
+            console.log("makeImageReplyText handler error", err, "for tweet id", req.params.tweetId);
+            res.json(500, err);
+            return;
+        } else {
+            twitterAtClient.twitter.post('statuses/update', { 
+                status: text,
+                in_reply_to_status_id : req.params.tweetId
+            }, function(err, reply) {
+                if (err) {
+                    console.log("twitter reply error", err);
+                    res.json(500, err);
+                    return;
+                }
+                console.log("Twitter reply send for ", req.params.tweetId);
+                res.json(200, "ok");
+            });
+        }
+    });
+    
+});
+
+function makeImageReplyText(tweetId, callback) {
+    retrieveTweetWithId(tweetId, function (err, tweet) {
+        if (err) {
+            callback("makeImageReplyText retrieveTweetWithId error");
+            return;
+        }
+        var tweetText = "@"+tweet.userScreenName+" checkout the screen grab at http://feellondon.com/feeltv/"+tweetId+"/";
+        callback(null, tweetText);
+    });
+}
+
 // ####Dev tweet list
 
 // Returns the lastest dev tweets
@@ -176,6 +212,21 @@ twitterMiddleware.add(function (tweet, next) {
     next();
 });
 
+// ##Check the tweet as @ this twitter account
+
+twitterMiddleware.add(function (tweet, next) {
+    if (tweet.text.indexOf("@"+process.env.TWITTER_SCREENNAME) === 0 ) {
+        next();
+    }
+});
+
+// ##Check the tweet is not from this twitter account (e.g. retweets itself)
+twitterMiddleware.add(function (tweet, next) {
+    if (tweet.userScreenName !== process.env.TWITTER_SCREENNAME) {
+        next();
+    }
+});
+
 // ##Check for banned users
 
 twitterMiddleware.add(function (tweet, next) {
@@ -201,9 +252,30 @@ twitterMiddleware.add(function (tweet, next) {
     next();
 });
 
+// ##Store tweet
+
+twitterMiddleware.add(function (tweet, next) {
+    storeTweet(tweet, function (err, result) {
+        if (err) { 
+            console.log('Problem storing tweet'); 
+            return;
+        }
+        next();
+    });
+});
+
 // ##Check for commands
 
 twitterMiddleware.add(function (tweet, next) {
+    if (checkForCommand('glitch', tweet)) {
+        loadPayload('glitch_payload.json', function (err, payload) {
+            if (err) {
+                console.log("Error loading payload", err);
+                return;
+            }
+            sendCommand(tweet, payload);
+        });
+    }
     next();
 });
 
@@ -239,18 +311,6 @@ twitterMiddleware.add(function (tweet, next) {
         if (!hasBadWord) {
             next();
         }
-    });
-});
-
-// ##Store tweet
-
-twitterMiddleware.add(function (tweet, next) {
-    storeTweet(tweet, function (err, result) {
-        if (err) { 
-            console.log('Problem storing tweet'); 
-            return;
-        }
-        next();
     });
 });
 
@@ -316,6 +376,10 @@ function retrieveTweetWithId(id, callback) {
             callback(err);
             return;
         }
+        if (tweetAsString === null) {
+            callback("could not find tweet with id");
+            return;
+        }
         // Try JSON it
         var tweet;
         try {
@@ -348,7 +412,9 @@ function sendModerationTweet(level, tweet) {
 function sendShoutout(tweet) {
     var moderationMessage = {
         resource : "/shoutout/new/",
-        body : tweet
+        body : {
+            tweet: tweet
+        }
     };
     try {
         str = JSON.stringify(moderationMessage);
@@ -357,6 +423,45 @@ function sendShoutout(tweet) {
         return;
     } 
     websocketServer.send(str);
+}
+
+function sendCommand(tweet, payload) {
+    var moderationMessage = {
+        resource : "/command/new/",
+        body : {
+            tweet: tweet,
+            payload : payload
+        }
+    };
+    try {
+        str = JSON.stringify(moderationMessage);
+    } catch (e) {
+        console.log('Error jsonifying moderation message', moderationMessage);
+        return;
+    } 
+    websocketServer.send(str);
+}
+
+function checkForCommand(command, tweet) {
+    var tweetText = tweet.text.toLowerCase();
+    return tweetText.indexOf(command) > -1;
+}
+
+function loadPayload(filename, callback) {
+    fs.readFile(path.join(__dirname,  'data/'+filename), 'utf8', function (err, data) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        var payload;
+        try {
+            payload = JSON.parse(data);
+        } catch (e) {
+            callback(e);
+            return;
+        }
+        callback(null, payload);
+    });
 }
 
 // #Twitter Stream Connect
