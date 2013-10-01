@@ -49,19 +49,38 @@ node app.feellondon.js
 ### Shoutout
 
     {
-        resource : "/shoutout/new/",
-        body : {
-            tweet : {
-                id : 
-                text : 
-                inReplyToId : 
-                inReplyToName : 
-                userId : 
-                userName : 
-                userScreenName : 
-                createdAt : 
-                hashTags : 
-                userMentions : 
+        "resource": "/shoutout/new/",
+        "body": {
+            "tweet": {
+                "id": 385037439565561860,
+                "text": "@1948dev #shoutout 123421342134123412341234",
+                "inReplyToId": 1732263122,
+                "inReplyToName": "1948dev",
+                "userId": 250881376,
+                "userName": "The Worker",
+                "userScreenName": "sputnik_w",
+                "createdAt": 1380635053000,
+                "hashTags": [
+                    {
+                        "text": "shoutout",
+                        "indices": [
+                            9,
+                            18
+                        ]
+                    }
+                ],
+                "userMentions": [
+                    {
+                        "screen_name": "1948dev",
+                        "name": "Ross Cairns",
+                        "id": 1732263122,
+                        "id_str": "1732263122",
+                        "indices": [
+                            0,
+                            8
+                        ]
+                    }
+                ]
             }
         }
     }
