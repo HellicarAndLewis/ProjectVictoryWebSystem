@@ -122,6 +122,11 @@ app.get('/api/banned-users/', bannedUsersStorage.middleware.get);
 app.post('/api/banned-users/', bannedUsersStorage.middleware.add);
 app.delete('/api/banned-users/', bannedUsersStorage.middleware.delete);
 
+// ####Last shoutouts
+app.get('/api/lastshoutouts/', function (req, res) {
+    res.json( lastShoutouts );
+});
+
 // ####Hashtag counter
 app.get('/hashtags/:tag/', getHashTagRequestHander(RedisTimeseriesStorage.RES_MINUTE));
 app.get('/hashtags/:tag/minute/', getHashTagRequestHander(RedisTimeseriesStorage.RES_MINUTE));
@@ -336,7 +341,8 @@ wsRouter
             if (err) {
                 console.log("Could not retrieve tweet with retrieveTweetWithId for id", params.tweetId);
             }
-           sendShoutout(tweet);
+            addToLastShoutouts(tweet);
+            sendShoutout(tweet);
         });
     });
 
@@ -464,8 +470,16 @@ function loadPayload(filename, callback) {
     });
 }
 
-// #Twitter Stream Connect
+// #Last shoutouts
 
+var lastShoutouts = [];
+
+function addToLastShoutouts (tweet) {
+    if (lastShoutouts.length>10) { lastShoutouts.shift(); }
+    lastShoutouts.push(tweet);
+}
+
+// #Twitter Stream Connect
 var twitterAtClient = new TwitterAtClient();
 
 // Connect the router up to the steaming twitter client 
