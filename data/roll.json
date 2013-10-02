@@ -1,0 +1,12 @@
+{
+   "effects" : [
+      {
+         "maps" : {
+            "amount" : 1.0,
+            "roll speed" : 0.5350506901741028
+         },
+         "name" : "badtv"
+      }
+   ],
+   "payloadName" : "roll"
+}

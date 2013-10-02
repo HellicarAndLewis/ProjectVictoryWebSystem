@@ -274,6 +274,7 @@ twitterMiddleware.add(function (tweet, next) {
 twitterMiddleware.add(function (tweet, next) {
 
     checkForCommandAndSendPayload('roll', tweet, 'roll.json');
+    checkForCommandAndSendPayload('scanlines', tweet, 'scanlines.json');
 
     next();
 });

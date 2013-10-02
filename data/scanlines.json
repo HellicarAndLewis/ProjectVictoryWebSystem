@@ -1,0 +1,11 @@
+{
+   "effects" : [
+      {
+         "maps" : {
+            "amount" : 1.0
+         },
+         "name" : "scanlines"
+      }
+   ],
+   "payloadName" : "scanlines"
+}
