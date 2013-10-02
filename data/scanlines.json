@@ -2,9 +2,18 @@
    "effects" : [
       {
          "maps" : {
-            "amount" : 1.0
+            "amount" : 1.0,
+            "count" : 337.4025573730469,
+            "nintensity" : 1.625891327857971,
+            "sintensity" : 0.9800580143928528
          },
          "name" : "scanlines"
+      },
+      {
+         "maps" : {
+            "amount" : 1.0
+         },
+         "name" : "flowlines"
       }
    ],
    "payloadName" : "scanlines"
