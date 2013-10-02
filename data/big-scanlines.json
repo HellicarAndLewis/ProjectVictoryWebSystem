@@ -1,0 +1,22 @@
+{
+   "effects" : [
+      {
+         "maps" : [
+            {
+               "amount" : 1.0
+            },
+            {
+               "count" : 188.9650726318359
+            },
+            {
+               "nintensity" : 0.6988080143928528
+            },
+            {
+               "sintensity" : 0.4904747009277344
+            }
+         ],
+         "name" : "scanlines"
+      }
+   ],
+   "payloadName" : "big-scanlines"
+}

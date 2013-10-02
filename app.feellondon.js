@@ -272,8 +272,44 @@ twitterMiddleware.add(function (tweet, next) {
 // ##Check for commands
 
 twitterMiddleware.add(function (tweet, next) {
-    if (checkForCommand('glitch', tweet)) {
-        loadPayload('glitch_payload.json', function (err, payload) {
+    if (checkForCommand('big-scanlines', tweet)) {
+        loadPayload('big-scanlines.json', function (err, payload) {
+            if (err) {
+                console.log("Error loading payload", err);
+                return;
+            }
+            sendCommand(tweet, payload);
+        });
+    }
+    if (checkForCommand('fine-scanlines', tweet)) {
+        loadPayload('fine-scanlines.json', function (err, payload) {
+            if (err) {
+                console.log("Error loading payload", err);
+                return;
+            }
+            sendCommand(tweet, payload);
+        });
+    }
+    if (checkForCommand('fine-distort', tweet)) {
+        loadPayload('fine-distort.json', function (err, payload) {
+            if (err) {
+                console.log("Error loading payload", err);
+                return;
+            }
+            sendCommand(tweet, payload);
+        });
+    }
+    if (checkForCommand('roll', tweet)) {
+        loadPayload('roll.json', function (err, payload) {
+            if (err) {
+                console.log("Error loading payload", err);
+                return;
+            }
+            sendCommand(tweet, payload);
+        });
+    }
+    if (checkForCommand('thick-distort', tweet)) {
+        loadPayload('thick-distort.json', function (err, payload) {
             if (err) {
                 console.log("Error loading payload", err);
                 return;
@@ -463,7 +499,7 @@ function sendHashTagCount(tag, resolution, result, token) {
         body : {
             tag: tag,
             resolution: resolution,
-            result : result
+            result : payload
         }
     };
     if (typeof token !== "undefined" || token !== null) {
