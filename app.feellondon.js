@@ -458,7 +458,7 @@ function sendHashTagCount(tag, resolution, result, token) {
         body : {
             tag: tag,
             resolution: resolution,
-            result : payload
+            result : result
         }
     };
     if (typeof token !== "undefined" || token !== null) {
