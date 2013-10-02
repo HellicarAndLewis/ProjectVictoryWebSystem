@@ -14,13 +14,14 @@ function PayloadLoader(options) {
 
 util.inherits(PayloadLoader, EventEmitter);
 
-PayloadLoader.prototype.loadPlayloads = function () {
+PayloadLoader.prototype.loadPlayloads = function (callback) {
     var self = this;
     var payloads = [];
 
     fs.readdir(this.payloadDirectory, function (err, files) {
         if (err) { 
             console.log( "Failed to load commands", err ); 
+            if (callback) { callback(err); }
             return;
         }
         loop(files.length, function (i, next) {
@@ -47,6 +48,9 @@ PayloadLoader.prototype.loadPlayloads = function () {
 
             self.payloadsSorted = payloads;
             self.emit('payloads updated', self.payloadsSorted);
+            if (callback) {
+                callback(null, self.payloadsSorted);
+            }
         });
     });
 };

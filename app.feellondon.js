@@ -151,6 +151,17 @@ app.get('/hashtags/:tag/hour/', getHashTagRequestHander(RedisTimeseriesStorage.R
 app.get('/hashtags/:tag/day/', getHashTagRequestHander(RedisTimeseriesStorage.RES_DAY));
 app.get('/hashtags/:tag/week/', getHashTagRequestHander(RedisTimeseriesStorage.RES_WEEK));
 
+// ####Reload the payloads
+app.get('/api/reload-payloads/', function (req, res) {
+    payloadLoader.loadPlayloads(function (err, payloads) {
+        if (err) {
+            res.json(500, err);
+            return;
+        }
+        res.json(payloads);
+    });
+});
+
 // ####Tweet back images uploaded
 app.get('/api/imageuploaded/:tweetId/', function (req, res) {
     makeImageReplyText(req.params.tweetId, function (err, text) {

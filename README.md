@@ -19,6 +19,7 @@ __HTTP API__
 * /hashtags/:hashtag/hour/ – Get the number of occurances of a `hashtag` per hour for every hour in the last 120 hours
 * /hashtags/:hashtag/day/ – Get the number of occurances of a `hashtag` per day for every day in the last 120 days
 * /hashtags/:hashtag/week/ – Get the number of occurances of a `hashtag` per week for every week in the last 120 week
+* /api/reload-payloads/ – reloads the payloads
 
 ### Dev webpages
 
