@@ -21,6 +21,7 @@ var RedisTimeseriesStorage = require(path.join(__dirname, 'libs/redis-timeseries
 var TwitterMiddleware = require(path.join(__dirname, 'libs/middleware.js'));
 var Router = require(path.join(__dirname, 'libs/router.js'));
 var MockTweetList = require(path.join(__dirname, 'libs/mock-tweet-list.js'));
+var PayloadLoader = require(path.join(__dirname, 'libs/payload-loader.js'));
 
 // #DB / Redis
 
@@ -49,6 +50,22 @@ var hashTagTimeseriesStorage = new RedisTimeseriesStorage({
 // Dev Tweets lists
 var mockTweetList = new MockTweetList({
     redisClient: redisClient
+});
+
+// Load the payloads
+var payloadLoader = new PayloadLoader({
+    payloadDirectory : path.join(__dirname, 'data/payloads/')
+});
+// Log out how many payloads get loaded
+payloadLoader.on('payloads updated', function (payloads) {
+    console.log("Loaded", payloads.length, "payloads");
+});
+// Load them
+payloadLoader.loadPlayloads();
+// Listen for any triggers
+payloadLoader.on('command triggered', function (payload, tweet) {
+    console.log('triggering payload', payload);
+    sendCommand(payload, tweet);
 });
 
 // ##Utils
@@ -273,10 +290,8 @@ twitterMiddleware.add(function (tweet, next) {
 
 twitterMiddleware.add(function (tweet, next) {
 
-    checkForCommandAndSendPayload('roll', tweet, 'roll.json');
-    checkForCommandAndSendPayload('scanlines', tweet, 'scanlines.json');
+    payloadLoader.checkAndTriggerCommands(tweet, next);
 
-    next();
 });
 
 // ##Check for shout out
@@ -435,7 +450,7 @@ function sendShoutout(tweet) {
     websocketServer.send(str);
 }
 
-function sendCommand(tweet, payload) {
+function sendCommand(payload, tweet) {
     var moderationMessage = {
         resource : "/command/new/",
         body : {
@@ -471,40 +486,6 @@ function sendHashTagCount(tag, resolution, result, token) {
         return;
     } 
     websocketServer.send(str);
-}
-
-function checkForCommandAndSendPayload(command, tweet, filename) {
-    if (checkForCommand(command, tweet)) {
-        loadPayload(filename, function (err, payload) {
-            if (err) {
-                console.log("Error loading payload", err);
-                return;
-            }
-            sendCommand(tweet, payload);
-        }); 
-    }
-}
-
-function checkForCommand(command, tweet) {
-    var tweetText = tweet.text.toLowerCase();
-    return tweetText.indexOf(command) > -1;
-}
-
-function loadPayload(filename, callback) {
-    fs.readFile(path.join(__dirname,  'data/'+filename), 'utf8', function (err, data) {
-        if (err) {
-            callback(err);
-            return;
-        }
-        var payload;
-        try {
-            payload = JSON.parse(data);
-        } catch (e) {
-            callback(e);
-            return;
-        }
-        callback(null, payload);
-    });
 }
 
 // #Last shoutouts

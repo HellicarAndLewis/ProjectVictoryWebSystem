@@ -4,3 +4,6 @@ script-send-test-tweet.sh
 script-run.sh
 
 /script-redis-commander.sh
+
+data/payloads/*
+!data/payloads/.gitkeep

@@ -59,7 +59,7 @@ $(function () {
             userName : "Dev list tweeter",
             userScreenName : $nameEl.val(),
             createdAt : Date.now(),
-            hashTags : [],
+            hashTags : getHashTagsFromText($textEl.val()),
             userMentions : []
         };
         var req = superagent
@@ -131,5 +131,18 @@ $(function () {
                 callback(err);
             });
     }  
+
+    function getHashTagsFromText(text) {
+        var hastags = [];
+        var result = $textEl.val().match(/#([^ ]*)/m);
+        for (var i = 1; i<result.length; i += 2) {
+            hastags.push({
+                text : result[i]
+            });
+        }
+        return hastags;
+    }
+
+
 
 });
