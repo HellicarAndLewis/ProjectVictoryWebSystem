@@ -272,51 +272,9 @@ twitterMiddleware.add(function (tweet, next) {
 // ##Check for commands
 
 twitterMiddleware.add(function (tweet, next) {
-    if (checkForCommand('big-scanlines', tweet)) {
-        loadPayload('big-scanlines.json', function (err, payload) {
-            if (err) {
-                console.log("Error loading payload", err);
-                return;
-            }
-            sendCommand(tweet, payload);
-        });
-    }
-    if (checkForCommand('fine-scanlines', tweet)) {
-        loadPayload('fine-scanlines.json', function (err, payload) {
-            if (err) {
-                console.log("Error loading payload", err);
-                return;
-            }
-            sendCommand(tweet, payload);
-        });
-    }
-    if (checkForCommand('fine-distort', tweet)) {
-        loadPayload('fine-distort.json', function (err, payload) {
-            if (err) {
-                console.log("Error loading payload", err);
-                return;
-            }
-            sendCommand(tweet, payload);
-        });
-    }
-    if (checkForCommand('roll', tweet)) {
-        loadPayload('roll.json', function (err, payload) {
-            if (err) {
-                console.log("Error loading payload", err);
-                return;
-            }
-            sendCommand(tweet, payload);
-        });
-    }
-    if (checkForCommand('thick-distort', tweet)) {
-        loadPayload('thick-distort.json', function (err, payload) {
-            if (err) {
-                console.log("Error loading payload", err);
-                return;
-            }
-            sendCommand(tweet, payload);
-        });
-    }
+
+    checkForCommandAndSendPayload('roll', tweet, 'roll.json');
+
     next();
 });
 
@@ -512,6 +470,18 @@ function sendHashTagCount(tag, resolution, result, token) {
         return;
     } 
     websocketServer.send(str);
+}
+
+function checkForCommandAndSendPayload(command, tweet, filename) {
+    if (checkForCommand(command, tweet)) {
+        loadPayload(filename, function (err, payload) {
+            if (err) {
+                console.log("Error loading payload", err);
+                return;
+            }
+            sendCommand(tweet, payload);
+        }); 
+    }
 }
 
 function checkForCommand(command, tweet) {
