@@ -135,10 +135,12 @@ $(function () {
     function getHashTagsFromText(text) {
         var hastags = [];
         var result = $textEl.val().match(/#([^ ]*)/m);
-        for (var i = 1; i<result.length; i += 2) {
-            hastags.push({
-                text : result[i]
-            });
+        if (result) {
+            for (var i = 1; i<result.length; i += 2) {
+                hastags.push({
+                    text : result[i]
+                });
+            }
         }
         return hastags;
     }
