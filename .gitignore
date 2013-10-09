@@ -7,3 +7,5 @@ script-run.sh
 
 data/payloads/*
 !data/payloads/.gitkeep
+/uploads.db
+/script-uploader.sh
