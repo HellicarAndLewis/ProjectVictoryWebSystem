@@ -11,13 +11,16 @@
     "less-middleware": "~0.1.11",
     "ws": "~0.4.30",
     "gaze": "~0.3.4",
-    "optimist": "~0.5.0",
+    "optimist": "~0.5.2",
     "underscore": "~1.4.4",
     "ntwitter": "~0.5.0",
     "lazy": "~1.0.11",
     "twit": "~1.1.9",
     "redis": "~0.8.4",
-    "hiredis": "~0.1.15"
+    "hiredis": "~0.1.15",
+    "knox": "~0.8.6",
+    "chokidar": "~0.6.3",
+    "nstore": "~0.5.2"
   },
   "devDependencies": {
     "docco": "~0.4.0"
