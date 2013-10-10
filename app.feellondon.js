@@ -193,7 +193,7 @@ function makeImageReplyText(tweetId, callback) {
             callback("makeImageReplyText retrieveTweetWithId error");
             return;
         }
-        var tweetText = "@"+tweet.userScreenName+" checkout the screen grab at http://feellondon.com/feeltv/"+tweetId+"/";
+        var tweetText = "@"+tweet.userScreenName+" checkout the screen grab at http://www.1948london.com/feeltv/"+tweetId+"/";
         callback(null, tweetText);
     });
 }
@@ -280,7 +280,7 @@ twitterMiddleware.add(function (tweet, next) {
 
 twitterMiddleware.add(function (tweet, next) {
     tweet.hashTags.forEach(function (hashTag) {
-        hashTagTimeseriesStorage.increment(hashTag.text);
+        hashTagTimeseriesStorage.increment( hashTag.text );
     });
     next();
 });
