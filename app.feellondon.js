@@ -193,7 +193,7 @@ function makeImageReplyText(tweetId, callback) {
             callback("makeImageReplyText retrieveTweetWithId error");
             return;
         }
-        var tweetText = "@"+tweet.userScreenName+" checkout the screen grab at http://www.1948london.com/feeltv/"+tweetId+"/";
+        var tweetText = "@"+tweet.userScreenName+" checkout the screen grab at http://feellondon.s3.amazonaws.com/feeltv/"+tweetId+"/";
         callback(null, tweetText);
     });
 }
