@@ -157,14 +157,17 @@ RedisTimeseriesStorage.RES_DAY      = "day";
 RedisTimeseriesStorage.RES_WEEK     = "week";
 
 RedisTimeseriesStorage.prototype.increment = function (key, callback) {
+    key = key.toLowerCase();
     increment(this.redisClient, 1, this.keyPrepend, key, callback);
 };
 
 RedisTimeseriesStorage.prototype.incrementBy = function (key, amount, callback) {
+    key = key.toLowerCase();
     increment(this.redisClient, amount, this.keyPrepend, key, callback);
 };
 
 RedisTimeseriesStorage.prototype.count = function (key, resolution, callback) {
+    key = key.toLowerCase();
     switch (resolution) {
         case RedisTimeseriesStorage.RES_MINUTE:
             countMinutes(this.redisClient, this.keyPrepend, key, callback);
