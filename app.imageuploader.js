@@ -19,6 +19,8 @@ var knox = require('knox');
 var path = require('path');
 var argv = require('optimist').argv;
 var http = require('http');
+var gm = require('gm');
+var fs = require('fs');
 
 // #S3
 
@@ -36,25 +38,39 @@ function startWatching () {
     watcher.on('add', function (filepath, stat) {
         var filename = path.basename(filepath);
 
-        if (!hasValidFilename(filename)) { return; }
-        ifNotSavedAlready(filename, function () {
-            console.log("Need to save:", filename);
-            saveFile(filename, function(err) {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                // save to nstore
-                console.log("Saving to nstore key", filename);
-                uploadsStore.save('feeltv/'+filename, {},  function (err) {
+        console.log( filepath );
+
+        // see if it is a png
+        if (path.extname(filename) === ".png") {
+            pngToJpeg(filepath);
+            return;
+        }
+
+        setTimeout(function () {
+
+            if (!hasValidFilename(filename)) { console.log("filename not valid for ", filename); return; }
+            ifNotSavedAlready(filename, function () {
+                console.log("Need to save:", filename);
+                saveFile(filename, function(err) {
                     if (err) {
-                        console.log("failed to save to nstore", filename, err);
+                        console.log(err);
                         return;
                     }
-                    pingServerOfNewImage(filename);
+                    // save to nstore
+                    console.log("Saving to nstore key", filename);
+                    uploadsStore.save('feeltv/'+filename, {},  function (err) {
+                        if (err) {
+                            console.log("failed to save to nstore", filename, err);
+                            return;
+                        }
+                        pingServerOfNewImage(filename);
+                    });
                 });
             });
-        });
+
+        }, 1000);
+
+  
     });
 }
 
@@ -66,7 +82,28 @@ var uploadsStore = nStore.new('uploads.db', startWatching);
 // #Utils
 
 function hasValidFilename(filename) {
-   return filename.match(/\.(?:bmp|gif|jpe?g|png)$/m);
+   return filename.match(/\.(?:bmp|gif|jpe?g|png)$/m) !== null;
+}
+
+function pngToJpeg(filepath) {
+    var dir = path.dirname(filepath);
+    var ext = path.extname(filepath);
+    var name = path.basename(filepath, ext);
+
+    fs.exists(dir + '/' + name + '.jpg', function (exists) {
+        if (exists) { return; }
+        setTimeout(function () {
+            gm(filepath).write(dir + '/' + name + '.jpg', function(err) {
+                if (err) {
+                    return console.dir(arguments)
+                }
+                console.log(this.outname + " created  ::  " + arguments[3])
+            }); 
+        }, 1000);
+    });
+
+
+   
 }
 
 function parseFilename(filename) {
@@ -87,6 +124,7 @@ function saveFile(filename, callback) {
     s3client.putFile(path.join(config.watchDirectory, filename), 'feeltv/'+filename, { 'x-amz-acl': 'public-read', 'x-amz-storage-class': 'REDUCED_REDUNDANCY' }, function (err, res) {
         if (err) { callback(err); return; }
         if (res.statusCode != 200) { callback(res); return; }
+        console.log(" saved file ", 'feeltv/'+filename);
         callback(null);
     });
 }
