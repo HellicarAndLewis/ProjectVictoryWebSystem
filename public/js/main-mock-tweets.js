@@ -99,7 +99,9 @@ $(function () {
     });
 
     $el.on('click touch','.triggerLater', function (event) {
-        setTimeout(tiggerCallToAction(event), 20000);
+        setTimeout(function () {
+            tiggerCallToAction(event);
+        }, 20000);
     });
 
     function tiggerCallToAction(event) {
