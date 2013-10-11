@@ -311,7 +311,7 @@ twitterMiddleware.add(function (tweet, next) {
     var i = 0;
     var hasShoutout = false;
     while (i < tweet.hashTags.length && !hasShoutout) {
-        if (tweet.hashTags[i].text === "shoutout") {
+        if (tweet.hashTags[i].text.toLowerCase() === "shoutout") {
             hasShoutout = true;
         }
         ++i;
