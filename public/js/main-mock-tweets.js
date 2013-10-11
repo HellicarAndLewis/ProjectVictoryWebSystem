@@ -95,11 +95,19 @@ $(function () {
     // Buttons for moderaation
 
     $el.on('click touch','.trigger', function (event) {
+        tiggerCallToAction(event);
+    });
+
+    $el.on('click touch','.triggerLater', function (event) {
+        setTimeout(tiggerCallToAction(event), 5000);
+    });
+
+    function tiggerCallToAction(event) {
         var $el = $(event.currentTarget).parent().parent().parent();
         var id = $el.data('tweet-id');
         console.log('trigger', id);
         sendTriggerTweet(id);
-    });
+    }
 
     $el.on('click touch','.remove', function (event) {
         var $el = $(event.currentTarget).parent().parent().parent();
