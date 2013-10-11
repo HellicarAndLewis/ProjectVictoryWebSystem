@@ -111,6 +111,13 @@ $(function () {
         sendTriggerTweet(id);
     }
 
+    $el.on('click touch','.triggerShoutUnmod', function (event) {
+        var $el = $(event.currentTarget).parent().parent().parent();
+        var id = $el.data('tweet-id');
+        console.log('trigger', id);
+        sendShoutoutWithoutModeration(id);
+    });
+
     $el.on('click touch','.remove', function (event) {
         var $el = $(event.currentTarget).parent().parent().parent();
         var id = $el.data('tweet-id');
@@ -141,6 +148,12 @@ $(function () {
                 callback(err);
             });
     }  
+
+    function sendShoutoutWithoutModeration(id) {
+        jsonSocket.send({
+            resource : '/moderation/legal/approved/'+id+'/'
+        });
+    }
 
     function getHashTagsFromText(text) {
         var hastags = [];
