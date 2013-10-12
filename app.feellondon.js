@@ -23,6 +23,13 @@ var Router = require(path.join(__dirname, 'libs/router.js'));
 var MockTweetList = require(path.join(__dirname, 'libs/mock-tweet-list.js'));
 var PayloadLoader = require(path.join(__dirname, 'libs/payload-loader.js'));
 
+// Logging
+var noop = function () {};
+var log = (process.env.PRODUCTION) ? noop : function () {
+    console.log("-------------------");
+    console.log.apply(this, arguments);
+};
+
 // #DB / Redis
 
 var redis = require("redis");
@@ -241,7 +248,7 @@ var twitterMiddleware = new TwitterMiddleware();
 // ##Logout the tweet
 
 twitterMiddleware.add(function (tweet, next) {
-    console.log(tweet);
+    log(tweet);
     next();
 });
 
@@ -250,6 +257,8 @@ twitterMiddleware.add(function (tweet, next) {
 twitterMiddleware.add(function (tweet, next) {
     if (tweet.text.indexOf("@"+process.env.TWITTER_SCREENNAME) === 0 ) {
         next();
+    } else {
+        log("Tweet not directed at twitter screen name");
     }
 });
 
@@ -257,6 +266,8 @@ twitterMiddleware.add(function (tweet, next) {
 twitterMiddleware.add(function (tweet, next) {
     if (tweet.userScreenName !== process.env.TWITTER_SCREENNAME) {
         next();
+    } else {
+        log("Tweet is not from someone else");
     }
 });
 
@@ -268,8 +279,8 @@ twitterMiddleware.add(function (tweet, next) {
             console.log("Error: error checking if twitter user exits", err);
             return;
         }
-        if (result === 1) {
-            console.log("Banned user tweeting", tweet);
+        if (result > 1) {
+            log("Banned user tweeting", tweet);
         } else {
             next();
         }
@@ -290,7 +301,7 @@ twitterMiddleware.add(function (tweet, next) {
 twitterMiddleware.add(function (tweet, next) {
     storeTweet(tweet, function (err, result) {
         if (err) { 
-            console.log('Problem storing tweet'); 
+            log('Problem storing tweet'); 
             return;
         }
         next();
@@ -318,6 +329,8 @@ twitterMiddleware.add(function (tweet, next) {
     }
     if (hasShoutout) {
         next();
+    } else {
+        log("Tweet doesn't have shoutout");
     }
 });
 
@@ -336,6 +349,8 @@ twitterMiddleware.add(function (tweet, next) {
         }
         if (!hasBadWord) {
             next();
+        } else {
+            log("Tweet has bad word");
         }
     });
 });
