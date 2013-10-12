@@ -91,14 +91,12 @@ function pngToJpeg(filepath) {
         setTimeout(function () {
             gm(filepath).write(dir + '/' + name + '.jpg', function(err) {
                 if (err) {
-                    return console.dir(arguments)
+                    return console.dir("Error converting file", arguments);
                 }
-                console.log(this.outname + " created  ::  " + arguments[3])
+                console.log(this.outname + " created  ::  " + arguments[3]);
             }); 
         }, 1000);
     });
-
-
    
 }
 
