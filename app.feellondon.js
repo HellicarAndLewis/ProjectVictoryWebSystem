@@ -340,17 +340,19 @@ twitterMiddleware.add(function (tweet, next) {
     getBadWords(function (badWords) {
         var i = 0;
         var hasBadWord = false;
+        var badWordsFound = [];
 
         while (i < badWords.length && !hasBadWord) { 
-            if (tweet.text.indexOf(badWords[i]) > -1) {
+            if (tweet.text.indexOf(badWordsFound[i]) > -1) {
                 hasBadWord = true;
+                badWords.push( badWordsFound[i] );
             }
             ++i;
         }
         if (!hasBadWord) {
             next();
         } else {
-            log("Tweet has bad word");
+            log("Tweet has bad words", badWords);
         }
     });
 });
