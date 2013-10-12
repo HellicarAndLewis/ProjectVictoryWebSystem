@@ -345,16 +345,17 @@ twitterMiddleware.add(function (tweet, next) {
         var tweetText = tweet.text.toLowerCase();
 
         while (i < badWords.length && !hasBadWord) { 
-            if (tweetText.indexOf(badWordsFound[i].toLowerCase()) > -1) {
+            if (tweetText.indexOf( badWords[i].toLowerCase() ) > -1) {
+
                 hasBadWord = true;
-                badWords.push( badWordsFound[i] );
+                badWordsFound.push( badWords[i] );
             }
             ++i;
         }
         if (!hasBadWord) {
             next();
         } else {
-            log("Tweet has bad words", badWords);
+            log("Tweet has bad words", badWordsFound);
         }
     });
 });
