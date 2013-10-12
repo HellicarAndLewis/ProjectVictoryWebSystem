@@ -11,6 +11,7 @@ $(function () {
     // Create the tag view
     
     getTagsFromServer(function (err, tags) {
+        tags = tags.sort();
         $('#tags').val(tags.join(',')).tag().on('added', addedHandler).on('removed', removedHandler);
     });
 
