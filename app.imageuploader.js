@@ -30,15 +30,11 @@ var s3client = knox.createClient(config.s3);
 
 // /^(?:(?!.*\.jpg).)*$/m
 
-
-
 var watcher = chokidar.watch(process.env.WATCH_DIRECTORY || argv.d, { ignored: /^\./, persistent: true });
  
 function startWatching () {
     watcher.on('add', function (filepath, stat) {
         var filename = path.basename(filepath);
-
-        console.log( filepath );
 
         // see if it is a png
         if (path.extname(filename) === ".png") {
