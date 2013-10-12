@@ -342,8 +342,10 @@ twitterMiddleware.add(function (tweet, next) {
         var hasBadWord = false;
         var badWordsFound = [];
 
+        var tweetText = tweet.text.toLowerCase();
+
         while (i < badWords.length && !hasBadWord) { 
-            if (tweet.text.indexOf(badWordsFound[i]) > -1) {
+            if (tweetText.indexOf(badWordsFound[i].toLowerCase()) > -1) {
                 hasBadWord = true;
                 badWords.push( badWordsFound[i] );
             }
