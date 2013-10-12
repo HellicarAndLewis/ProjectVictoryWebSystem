@@ -359,6 +359,7 @@ twitterMiddleware.add(function (tweet, next) {
 
 twitterMiddleware.add(function (tweet, next) {
     sendModerationTweet('initial', tweet);
+    log("tweet sent for moderation");
 });
 
 // #Websocket listener / router
