@@ -3,6 +3,7 @@ extends layout
 block content
 
     link(rel='stylesheet', href='/js/libs/bootstrap-tag.css')
+    link(rel='stylesheet', href="/js/libs/bootstrap-switch/bootstrap-switch.css")
 
     .navbar.navbar-inverse.navbar-fixed-top
         .navbar-inner
@@ -21,14 +22,30 @@ block content
                     br/
                     br/
                     br/
-        .row#bad-words
-            .span12
-                .span12
-                    .btn.btn-primary.shoutoutFlood Flood shoutouts
+        .row
+            fieldset
+                legend Flood commands
+                label Will trigger screenshots
+                label Rate (Milliseconds:
+                    span.rate 10 
+                    | )
+                input(type='range', name='points', min='60', max='10000').range
+                p Run flood
+                .make-switch.switch-large.switch-small.commands
+                    input(type="checkbox")
+                label Last mesage at:
+                label.lastMessage
+                br/
+                br/
+        //- .row#bad-words
+        //-     .span12 
+        //-         .span12
+        //-             .btn.btn-primary.shoutoutFlood Flood shoutouts
             
     // scripts
     script(src="/js/libs/superagent.js")
     script(src="/js/libs/ICanHaz.min.js")
     script(src="/js/libs/bootstrap-tag.js")
     script(src="/js/socket-connection.js")
+    script(src="/js/libs/bootstrap-switch/bootstrap-switch.js")
     script(src="/js/main-flood.js")

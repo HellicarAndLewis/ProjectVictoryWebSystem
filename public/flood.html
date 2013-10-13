@@ -12,6 +12,7 @@
   </head>
   <body>
     <link rel="stylesheet" href="/js/libs/bootstrap-tag.css">
+    <link rel="stylesheet" href="/js/libs/bootstrap-switch/bootstrap-switch.css">
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -29,12 +30,19 @@
           <div class="span12"><br><br><br><br></div>
         </div>
       </div>
-      <div id="bad-words" class="row">
-        <div class="span12">
-          <div class="span12">
-            <div class="btn btn-primary shoutoutFlood">Flood shoutouts</div>
+      <div class="row">
+        <fieldset>
+          <legend>Flood commands</legend>
+          <label>Will trigger screenshots</label>
+          <label>Rate (Milliseconds:<span class="rate">10 </span>)</label>
+          <input type="range" name="points" min="60" max="10000" class="range">
+          <p>Run flood</p>
+          <div class="make-switch switch-large switch-small commands">
+            <input type="checkbox">
           </div>
-        </div>
+          <label>Last mesage at:</label>
+          <label class="lastMessage"></label><br><br>
+        </fieldset>
       </div>
     </div>
     <!-- scripts-->
@@ -42,6 +50,7 @@
     <script src="/js/libs/ICanHaz.min.js"></script>
     <script src="/js/libs/bootstrap-tag.js"></script>
     <script src="/js/socket-connection.js"></script>
+    <script src="/js/libs/bootstrap-switch/bootstrap-switch.js"></script>
     <script src="/js/main-flood.js"></script>
   </body>
 </html>
