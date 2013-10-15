@@ -1,9 +1,11 @@
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 
-function DevTweetList(options) {
+function MockTweetList(options) {
     var self = this;
     this.redisClient = options.redisClient;
+    // the standard saving of tweets
+    this.systemStoreTweet = options.storeTweet || function () {};
 
     this.middleware = {
         get: function (req, res) {
@@ -16,6 +18,11 @@ function DevTweetList(options) {
             });
         },
         post: function (req, res) {
+            self.systemStoreTweet(req.body, function (err) {
+                if (err) {
+                    console.error( "Mock tweet list error saving tweet in main system" );
+                }
+            });
             storeTweet(self.redisClient, req.body, function (err) {
                 if (err) {
                     req.json(500, err);
@@ -48,7 +55,7 @@ function DevTweetList(options) {
     };
 }
 
-util.inherits(DevTweetList, EventEmitter);
+util.inherits(MockTweetList, EventEmitter);
 
 //#Utils
 
@@ -141,4 +148,4 @@ function removeTweetById(redisClient, id, callback) {
 
 //#Exports
 
-module.exports = DevTweetList;
+module.exports = MockTweetList;
