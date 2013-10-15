@@ -2,6 +2,84 @@ var jsonSocket;
 var itemsToAdd = [];
 var itemsToRemove = [];
 
+var Flood = W.Object.extend({
+    // Events
+    // * flood triggered
+    constructor : function (options) {
+
+        var self = this;
+        W.extend(self, W.EventMixin);
+        
+        // Create the EL
+        this.$el = $(ich["template-flood"]({
+            title : options.title || "Flood",
+            label: options.label || "Label"
+        }));
+
+        // Append to it
+        if (options.appendTo) {
+            options.appendTo.append(this.$el);
+        }
+
+        // Commands
+        var $checkboxEl = this.$el.find('.commands').bootstrapSwitch();
+        var $rangeEl = this.$el.find('.range');
+        var $lastMessageEl = this.$el.find('.lastMessage');
+        var $rateEl = this.$el.find('.rate');
+
+        var rate = 0;
+
+        $checkboxEl.on('switch-change', function (e, data) {
+            var $el = $(this);
+            if (data.value) {
+                startFlood();
+            } else {
+                endFlood();
+            }
+        });
+
+        $rangeEl.on('change', updateRate);
+        function updateRate() {
+            rate = $rangeEl.val();
+            $rateEl.text( rate );
+        }
+        updateRate();
+
+        var lastTrigger = 0;
+        var timeoutId = 0;
+
+        function startFlood() {
+            timeoutId = setTimeout(function () {
+                
+                var now = Date.now();
+                if (now - lastTrigger > rate) {
+                    lastTrigger = now;
+                    $lastMessageEl.text( new Date() );
+                    self.trigger('flood triggered');
+                }
+                startFlood();
+            }, 10);
+        }
+
+        function endFlood() {
+            clearTimeout(timeoutId);
+        }
+    }
+});
+
+var RandomSentence = W.Object.extend({
+    constructor : function (options) {
+        if (!options) { options = {}; }
+        this.subjects= options.subjects || ['I','You','Bob','John','Sue','Kate','The lizard people'];
+        this.verbs= options.verbs || ['will search for','will get','will find','attained','found','will start interacting with','will accept','accepted'];
+        this.objects= options.objects || ['Billy','an apple','a Triforce','the treasure','a sheet of paper'];
+        this.endings= options.endings || ['.',', right?','.',', like I said.','.',', just like your momma!'];
+    },
+    get : function () {
+        return this.subjects[Math.round(Math.random()*(this.subjects.length-1))]+' '+this.verbs[Math.round(Math.random()*(this.verbs.length-1))]+' '+this.objects[Math.round(Math.random()*(this.objects.length-1))]+this.endings[Math.round(Math.random()*(this.endings.length-1))];
+    }
+});
+
 $(function () {
 
     // Socket connect
@@ -28,53 +106,46 @@ $(function () {
 
     });
 
-    (function () {
-        // Commands
-        var $commandsCheckbox = $('.commands');
-        var $commandsRange = $('.range');
-        var $commandsLastMessage = $('.lastMessage');
-        var $commandsRate = $('.rate');
-        
-        var rate = 0;
+    // #Set up floods
+    
+    var floodsContainer = $('.floods');
 
-        $commandsCheckbox.on('switch-change', function (e, data) {
-            var $el = $(this);
-            if (data.value) {
-                startCommandFlood();
-            } else {
-                endCommandFlood();
-            }
+    // ##Commands
+
+    // Helper
+    function createCommandFlood(command) {
+        var commandFlood = new Flood({
+            title : "Command: " + command,
+            label : "Floods '"+command+"' command",
+            appendTo : floodsContainer
         });
 
-        $commandsRange.on('change', updateRate);
+        commandFlood.on('flood triggered', function () {
+            sendCommand("@1948dev "+command);
+        });
+    }
 
-        function updateRate() {
-            rate = $commandsRange.val();
-            $commandsRate.text( rate );
-        }
+    createCommandFlood( "distort" );
+    createCommandFlood( "wavy" );
+    createCommandFlood( "scan" );
+    createCommandFlood( "trail" );
+    createCommandFlood( "hyper" );
+    createCommandFlood( "glitch" );
+    createCommandFlood( "spectrum" );
 
-        updateRate();
+    // ##Shoutouts
 
-        var lastTrigger = 0;
-        var timeoutId = 0;
+    var shoutoutFlood = new Flood({
+        title : "Shoutouts: random",
+        label : "Floods shoutouts with random sentences",
+        appendTo : floodsContainer
+    });
 
-        function startCommandFlood() {
-            timeoutId = setTimeout(function () {
-                
-                var now = Date.now();
-                if (now - lastTrigger > rate) {
-                    lastTrigger = now;
-                    $commandsLastMessage.text( now );
-                    sendCommand();
-                }
-                startCommandFlood();
-            }, 10);
-        }
+    var randomSentence = new RandomSentence();
 
-        function endCommandFlood() {
-            clearTimeout(timeoutId);
-        }
-    }());
+    shoutoutFlood.on('flood triggered', function () {
+        sendShoutout( "@1948dev #shoutout " + randomSentence.get() );
+    });
 
 });
 
@@ -91,13 +162,38 @@ function runFlood(callback) {
     }, callback);
 }
 
-function sendCommand() {
+function sendShoutout(tweetText) {
+    var shoutout = {
+        "resource": "/shoutout/new/",
+        "body": {
+            "tweet": {
+                "id": "10000" + Date.now(),
+                "text": tweetText,
+                "inReplyToId": null,
+                "inReplyToName": null,
+                "userId": 0,
+                "userName": "Dev list tweeter",
+                "userScreenName": "1948devlist",
+                "createdAt": 1381839595674,
+                "hashTags": [
+                    {
+                        "text": "shoutout"
+                    }
+                ],
+                "userMentions": []
+            }
+        }
+    };
+    jsonSocket.send( shoutout );
+}
+
+function sendCommand(tweetText) {
     var command = {
         "resource": "/command/new/",
         "body": {
             "tweet": {
-                "id": 10000 + Date.now(),
-                "text": "@1948dev destort thick ",
+                "id": "10000" + Date.now(),
+                "text": tweetText,
                 "inReplyToId": null,
                 "inReplyToName": null,
                 "userId": 0,
