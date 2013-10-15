@@ -172,7 +172,7 @@ app.get('/api/reload-payloads/', function (req, res) {
 
 // ####Tweet back images uploaded
 app.get('/api/imageuploaded/:tweetId/', function (req, res) {
-    makeImageReplyText(req.params.tweetId, function (err, text) {
+    makeImageReplyText(req.params.tweetId, function (err, text, tweet) {
         if (err) {
             console.log("makeImageReplyText handler error", err, "for tweet id", req.params.tweetId);
             res.json(500, err);
@@ -180,7 +180,7 @@ app.get('/api/imageuploaded/:tweetId/', function (req, res) {
         } else {
             twitterAtClient.twitter.post('statuses/update', { 
                 status: text,
-                in_reply_to_status_id : req.params.tweetId
+                in_reply_to_status_id : tweet.id_str
             }, function(err, reply) {
                 if (err) {
                     console.log("twitter reply error", err);
@@ -202,7 +202,7 @@ function makeImageReplyText(tweetId, callback) {
             return;
         }
         var tweetText = "@"+tweet.userScreenName+" Nice work! Keep watching for more commands. http://www.1948london.com/feeltv/"+tweetId+"/";
-        callback(null, tweetText);
+        callback(null, tweetText, tweet);
     });
 }
 
