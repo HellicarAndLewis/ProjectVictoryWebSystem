@@ -167,7 +167,7 @@ function sendShoutout(tweetText) {
         "resource": "/shoutout/new/",
         "body": {
             "tweet": {
-                "id": "10000" + Date.now(),
+                "id": "99999" + Date.now(),
                 "text": tweetText,
                 "inReplyToId": null,
                 "inReplyToName": null,
@@ -190,9 +190,9 @@ function sendShoutout(tweetText) {
 function sendCommand(tweetText) {
     var command = {
         "resource": "/command/new/",
-        "body": {
+        "body": {   
             "tweet": {
-                "id": "10000" + Date.now(),
+                "id": "99999" + Date.now(),
                 "text": tweetText,
                 "inReplyToId": null,
                 "inReplyToName": null,
