@@ -68,6 +68,7 @@ function getTweetObj(tweet) {
 
     var data = {
         id : tweet.id,
+        idStr : tweet.id_str,
         text : tweet.text,
         inReplyToId : tweet.in_reply_to_user_id,
         inReplyToName : tweet.in_reply_to_screen_name,

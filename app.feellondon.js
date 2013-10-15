@@ -180,7 +180,7 @@ app.get('/api/imageuploaded/:tweetId/', function (req, res) {
         } else {
             twitterAtClient.twitter.post('statuses/update', { 
                 status: text,
-                in_reply_to_status_id : tweet.id_str
+                in_reply_to_status_id : tweet.idStr
             }, function(err, reply) {
                 if (err) {
                     console.log("twitter reply error", err);
