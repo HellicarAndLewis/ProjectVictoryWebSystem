@@ -51,7 +51,7 @@ $(function () {
     function postNewTweet(callback) {
         var date = new Date();
         var tweet =  {
-            id : Date.now(),
+            id : "99999" + Date.now(),
             text : $textEl.val(),
             inReplyToId : null,
             inReplyToName : null,
