@@ -56,7 +56,8 @@ var hashTagTimeseriesStorage = new RedisTimeseriesStorage({
 
 // Dev Tweets lists
 var mockTweetList = new MockTweetList({
-    redisClient: redisClient
+    redisClient: redisClient,
+    storeTweet: storeTweet
 });
 
 // Load the payloads
