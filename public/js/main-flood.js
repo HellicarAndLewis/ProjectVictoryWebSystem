@@ -113,7 +113,7 @@ $(function () {
     // ##Commands
 
     // Helper
-    function createCommandFlood(command) {
+    function createCommandFlood(command, effect) {
         var commandFlood = new Flood({
             title : "Command: " + command,
             label : "Floods '"+command+"' command",
@@ -121,17 +121,17 @@ $(function () {
         });
 
         commandFlood.on('flood triggered', function () {
-            sendCommand("@1948dev "+command);
+            sendCommand("@1948dev "+command, command, effect);
         });
     }
 
-    createCommandFlood( "distort" );
-    createCommandFlood( "wavy" );
-    createCommandFlood( "scan" );
-    createCommandFlood( "trail" );
-    createCommandFlood( "hyper" );
-    createCommandFlood( "glitch" );
-    createCommandFlood( "spectrum" );
+    createCommandFlood( "distort", "griddistort");
+    createCommandFlood( "wavy", "badtv" );
+    createCommandFlood( "scan", "scanlines" );
+    createCommandFlood( "trail", "flowlines" );
+    createCommandFlood( "hyper", "khronos" );
+    createCommandFlood( "glitch", "rgbshift" );
+    createCommandFlood( "spectrum", "spectrum" );
 
     // ##Shoutouts
 
@@ -187,7 +187,7 @@ function sendShoutout(tweetText) {
     jsonSocket.send( shoutout );
 }
 
-function sendCommand(tweetText) {
+function sendCommand(tweetText, command, effect) {
     var command = {
         "resource": "/command/new/",
         "body": {   
@@ -204,7 +204,7 @@ function sendCommand(tweetText) {
                 "userMentions": []
             },
             "payload": {
-                "command": "destort thick ",
+                "command": command,
                 "effects": [
                     {
                         "maps": {
@@ -214,10 +214,10 @@ function sendCommand(tweetText) {
                             "roll speed": 0.1652590483427048,
                             "thick distort": 5.565217018127441
                         },
-                        "name": "badtv"
+                        "name": effect
                     }
                 ],
-                "payloadName": "thick-destort"
+                "payloadName": command
             }
         }
     };
