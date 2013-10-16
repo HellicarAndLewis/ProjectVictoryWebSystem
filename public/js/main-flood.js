@@ -129,7 +129,7 @@ $(function () {
     createCommandFlood( "wavy", "badtv" );
     createCommandFlood( "scan", "scanlines" );
     createCommandFlood( "trail", "flowlines" );
-    createCommandFlood( "hyper", "khronos" );
+    createCommandFlood( "hyper", "khronos" );   
     createCommandFlood( "glitch", "rgbshift" );
     createCommandFlood( "spectrum", "spectrum" );
 

@@ -253,10 +253,11 @@ twitterMiddleware.add(function (tweet, next) {
     next();
 });
 
-// ##Check the tweet as @ this twitter account
+// ##Check the tweet has @ this twitter account
 
 twitterMiddleware.add(function (tweet, next) {
-    if (tweet.text.indexOf("@"+process.env.TWITTER_SCREENNAME) === 0 ) {
+    var tweetTextLowercase = tweet.text.toLowerCase();
+    if (tweetTextLowercase.indexOf("@"+process.env.TWITTER_SCREENNAME) === 0 ) {
         next();
     } else {
         log("Tweet not directed at twitter screen name");
