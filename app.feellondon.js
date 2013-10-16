@@ -253,6 +253,16 @@ twitterMiddleware.add(function (tweet, next) {
     next();
 });
 
+// ##Check for valid tweet
+
+twitterMiddleware.add(function (tweet, next) {
+    if (tweet) {
+        next();
+    } else {
+        log("Error: Tweet was not valid");
+    }
+});
+
 // ##Check the tweet has @ this twitter account
 
 twitterMiddleware.add(function (tweet, next) {
