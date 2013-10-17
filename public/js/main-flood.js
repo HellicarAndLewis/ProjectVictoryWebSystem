@@ -131,7 +131,7 @@ $(function () {
     createCommandFlood( "trail", "flowlines" );
     createCommandFlood( "hyper", "khronos" );   
     createCommandFlood( "glitch", "rgbshift" );
-    createCommandFlood( "spectrum", "spectrum" );
+    createCommandFlood( "spectrum", "colormap" );
 
     // ##Shoutouts
 
