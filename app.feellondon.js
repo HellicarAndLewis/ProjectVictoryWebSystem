@@ -259,7 +259,7 @@ twitterMiddleware.add(function (tweet, next) {
     if (tweet) {
         next();
     } else {
-        log("Error: Tweet was not valid");
+        log("Error: tweet was not valid");
     }
 });
 

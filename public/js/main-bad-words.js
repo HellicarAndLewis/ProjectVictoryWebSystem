@@ -30,7 +30,7 @@ $(function () {
 
     // Add default button
     
-    $addDefaultButton.on('click touch', addDefaultSet);
+    // $addDefaultButton.on('click touch', addDefaultSet);
 
     // Save button
 
